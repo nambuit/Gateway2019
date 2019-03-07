@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog" prefer="system">
+    <system systemId="http://dogor-fbu:8080/PrimeraGateway/T24Interface?wsdl" uri="src/conf/xml-resources/web-service-references/T24Interface/wsdl/dogor-fbu_8080/PrimeraGateway/T24Interface.wsdl"/>
+    <system systemId="http://dogor-fbu:8080/PrimeraGateway/T24Interface?xsd=1" uri="src/conf/xml-resources/web-service-references/T24Interface/wsdl/dogor-fbu_8080/PrimeraGateway/T24Interface.xsd_1.xsd"/>
+</catalog>

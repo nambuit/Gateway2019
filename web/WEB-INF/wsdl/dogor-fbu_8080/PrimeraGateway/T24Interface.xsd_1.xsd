@@ -1,0 +1,290 @@
+<?xml version='1.0' encoding='UTF-8'?><!-- Published by JAX-WS RI (http://jax-ws.java.net). RI's version is Metro/2.3.2-b608 (trunk-7979; 2015-01-21T12:50:19+0000) JAXWS-RI/2.2.11-b150120.1832 JAXWS-API/2.2.12 JAXB-RI/2.2.12-b141219.1637 JAXB-API/2.2.13-b141020.1521 svn-revision#unknown. --><xs:schema xmlns:tns="http://service.com/" xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0" targetNamespace="http://service.com/">
+
+<xs:element name="GetAccountByAccountNo" type="tns:GetAccountByAccountNo"/>
+
+<xs:element name="GetAccountByAccountNoResponse" type="tns:GetAccountByAccountNoResponse"/>
+
+<xs:element name="GetAccounts" type="tns:GetAccounts"/>
+
+<xs:element name="GetAccountsByPhoneNo" type="tns:GetAccountsByPhoneNo"/>
+
+<xs:element name="GetAccountsByPhoneNoResponse" type="tns:GetAccountsByPhoneNoResponse"/>
+
+<xs:element name="GetAccountsResponse" type="tns:GetAccountsResponse"/>
+
+<xs:element name="GetBalance" type="tns:GetBalance"/>
+
+<xs:element name="GetBalanceResponse" type="tns:GetBalanceResponse"/>
+
+<xs:element name="GetCustomer" type="tns:GetCustomer"/>
+
+<xs:element name="GetCustomerResponse" type="tns:GetCustomerResponse"/>
+
+<xs:element name="GetCustomerTransactions" type="tns:GetCustomerTransactions"/>
+
+<xs:element name="GetCustomerTransactionsResponse" type="tns:GetCustomerTransactionsResponse"/>
+
+<xs:element name="GetPassport" type="tns:GetPassport"/>
+
+<xs:element name="GetPassportResponse" type="tns:GetPassportResponse"/>
+
+<xs:element name="PlaceLien" type="tns:PlaceLien"/>
+
+<xs:element name="PlaceLienResponse" type="tns:PlaceLienResponse"/>
+
+<xs:element name="Retreivesignature" type="tns:Retreivesignature"/>
+
+<xs:element name="RetreivesignatureResponse" type="tns:RetreivesignatureResponse"/>
+
+<xs:element name="UnPlaceLien" type="tns:UnPlaceLien"/>
+
+<xs:element name="UnPlaceLienResponse" type="tns:UnPlaceLienResponse"/>
+
+<xs:element name="UpdatePhoneNo" type="tns:UpdatePhoneNo"/>
+
+<xs:element name="UpdatePhoneNoResponse" type="tns:UpdatePhoneNoResponse"/>
+
+<xs:complexType name="GetCustomerTransactions">
+<xs:sequence>
+<xs:element name="InstitutionCode" type="xs:string" minOccurs="0"/>
+<xs:element name="AccountNumber" type="xs:string" minOccurs="0"/>
+<xs:element name="Startdate" type="xs:string" minOccurs="0"/>
+<xs:element name="Enddate" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetCustomerTransactionsResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:transaction" minOccurs="0" maxOccurs="unbounded"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="transaction">
+<xs:sequence>
+<xs:element name="amount" type="xs:string" minOccurs="0"/>
+<xs:element name="currency" type="xs:string" minOccurs="0"/>
+<xs:element name="institutionCode" type="xs:string" minOccurs="0"/>
+<xs:element name="isSuccessful" type="xs:boolean" minOccurs="0"/>
+<xs:element name="message" type="xs:string" minOccurs="0"/>
+<xs:element name="reference" type="xs:string" minOccurs="0"/>
+<xs:element name="transactionID" type="xs:string" minOccurs="0"/>
+<xs:element name="valueDate" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="Retreivesignature">
+<xs:sequence>
+<xs:element name="InstitutionCode" type="xs:string" minOccurs="0"/>
+<xs:element name="CustomerID" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="RetreivesignatureResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:customerSignature" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="customerSignature">
+<xs:sequence>
+<xs:element name="customerNo" type="xs:string" minOccurs="0"/>
+<xs:element name="institutionCode" type="xs:string" minOccurs="0"/>
+<xs:element name="isSuccessful" type="xs:boolean" minOccurs="0"/>
+<xs:element name="message" type="xs:string" minOccurs="0"/>
+<xs:element name="signature" type="xs:base64Binary" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetBalance">
+<xs:sequence>
+<xs:element name="InstitutionCode" type="xs:string" minOccurs="0"/>
+<xs:element name="AccountNumber" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetBalanceResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:accountBalance" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="accountBalance">
+<xs:sequence>
+<xs:element name="accountNumber" type="xs:string" minOccurs="0"/>
+<xs:element name="availableBalance" type="xs:string" minOccurs="0"/>
+<xs:element name="currency" type="xs:string" minOccurs="0"/>
+<xs:element name="institutionCode" type="xs:string" minOccurs="0"/>
+<xs:element name="isSuccessful" type="xs:boolean" minOccurs="0"/>
+<xs:element name="ledgerBalance" type="xs:string" minOccurs="0"/>
+<xs:element name="message" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetCustomer">
+<xs:sequence>
+<xs:element name="InstitutionCode" type="xs:string" minOccurs="0"/>
+<xs:element name="CustomerID" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetCustomerResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:customer" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="customer">
+<xs:sequence>
+<xs:element name="accountOfficer" type="xs:string" minOccurs="0"/>
+<xs:element name="customerName" type="xs:string" minOccurs="0"/>
+<xs:element name="customerNo" type="xs:string" minOccurs="0"/>
+<xs:element name="industry" type="xs:string" minOccurs="0"/>
+<xs:element name="institutionCode" type="xs:string" minOccurs="0"/>
+<xs:element name="isSuccessful" type="xs:boolean" minOccurs="0"/>
+<xs:element name="message" type="xs:string" minOccurs="0"/>
+<xs:element name="nationality" type="xs:string" minOccurs="0"/>
+<xs:element name="residence" type="xs:string" minOccurs="0"/>
+<xs:element name="sector" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="UpdatePhoneNo">
+<xs:sequence>
+<xs:element name="InstitutionCode" type="xs:string" minOccurs="0"/>
+<xs:element name="CustomerID" type="xs:string" minOccurs="0"/>
+<xs:element name="PhoneNo" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="UpdatePhoneNoResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:responseObject" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="responseObject">
+<xs:sequence>
+<xs:element name="data" type="xs:string" minOccurs="0"/>
+<xs:element name="institutionCode" type="xs:string" minOccurs="0"/>
+<xs:element name="isSuccessful" type="xs:boolean" minOccurs="0"/>
+<xs:element name="messgae" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetAccountByAccountNo">
+<xs:sequence>
+<xs:element name="InstitutionCode" type="xs:string" minOccurs="0"/>
+<xs:element name="AccountNumber" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetAccountByAccountNoResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:accountDetails" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="accountDetails">
+<xs:sequence>
+<xs:element name="accountName" type="xs:string" minOccurs="0"/>
+<xs:element name="accountNumber" type="xs:string" minOccurs="0"/>
+<xs:element name="accountOfficer" type="xs:string" minOccurs="0"/>
+<xs:element name="accountType" type="xs:string" minOccurs="0"/>
+<xs:element name="currency" type="xs:string" minOccurs="0"/>
+<xs:element name="customerName" type="xs:string" minOccurs="0"/>
+<xs:element name="institutionCode" type="xs:string" minOccurs="0"/>
+<xs:element name="isSuccessful" type="xs:boolean" minOccurs="0"/>
+<xs:element name="message" type="xs:string" minOccurs="0"/>
+<xs:element name="onlineActualBalance" type="xs:string" minOccurs="0"/>
+<xs:element name="phoneNo" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetPassport">
+<xs:sequence>
+<xs:element name="InstitutionCode" type="xs:string" minOccurs="0"/>
+<xs:element name="CustomerID" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetPassportResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:customerPassport" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="customerPassport">
+<xs:sequence>
+<xs:element name="customerNo" type="xs:string" minOccurs="0"/>
+<xs:element name="institutionCode" type="xs:string" minOccurs="0"/>
+<xs:element name="isSuccessful" type="xs:boolean" minOccurs="0"/>
+<xs:element name="message" type="xs:string" minOccurs="0"/>
+<xs:element name="photo" type="xs:base64Binary" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetAccountsByPhoneNo">
+<xs:sequence>
+<xs:element name="InstitutionCode" type="xs:string" minOccurs="0"/>
+<xs:element name="PhoneNo" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetAccountsByPhoneNoResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:accountDetails" minOccurs="0" maxOccurs="unbounded"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="UnPlaceLien">
+<xs:sequence>
+<xs:element name="LienDetails" type="tns:lienDetails" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="lienDetails">
+<xs:sequence>
+<xs:element name="accountNumber" type="xs:string" minOccurs="0"/>
+<xs:element name="amount" type="xs:string" minOccurs="0"/>
+<xs:element name="description" type="xs:string" minOccurs="0"/>
+<xs:element name="fromDate" type="xs:string" minOccurs="0"/>
+<xs:element name="institutionCode" type="xs:string" minOccurs="0"/>
+<xs:element name="isSuccessful" type="xs:boolean" minOccurs="0"/>
+<xs:element name="message" type="xs:string" minOccurs="0"/>
+<xs:element name="permissionLevel" type="xs:string" minOccurs="0"/>
+<xs:element name="referenceNo" type="xs:string" minOccurs="0"/>
+<xs:element name="toDate" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="UnPlaceLienResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:lienDetails" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetAccounts">
+<xs:sequence>
+<xs:element name="InstitutionCode" type="xs:string" minOccurs="0"/>
+<xs:element name="AccountNumber" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetAccountsResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:accountDetails" minOccurs="0" maxOccurs="unbounded"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="PlaceLien">
+<xs:sequence>
+<xs:element name="LienDetails" type="tns:lienDetails" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="PlaceLienResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:lienDetails" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+</xs:schema>
