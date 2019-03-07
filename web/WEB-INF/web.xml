@@ -39,4 +39,20 @@
         <env-entry-type>java.lang.String</env-entry-type>
         <env-entry-value>C:\Temenos\Modelbank-R13\3rdParty\jboss\server\default\deploy\BrowserWeb.war</env-entry-value>
     </env-entry>  
+ 
+      <env-entry>
+        <env-entry-name>DBuser</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>inlaks</env-entry-value>        
+    </env-entry>
+         <env-entry>
+        <env-entry-name>DBpass</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>own2morrow</env-entry-value>
+    </env-entry>  
+         <env-entry>
+        <env-entry-name>DBserver</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>localhost</env-entry-value>
+    </env-entry> 
 </web-app>
