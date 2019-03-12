@@ -66,7 +66,7 @@ private String ImageBase;
                throw new Exception(result.get(1).get(0));
            }
            
-           String Customer = result.get(1).get(headers.indexOf("Customer")).replace("\"", "").trim();
+          String Customer = result.get(1).get(headers.indexOf("Customer")).replace("\"", "").trim();
            result = t24.getOfsData("ACCOUNTS$PRIMERA",Ofsuser,Ofspass,"CUSTOMER:EQ="+Customer.trim());
             
        for(int i=1;i<result.size();i++){
@@ -81,7 +81,7 @@ private String ImageBase;
         details.setPhoneNo(result.get(i).get(headers.indexOf("PhoneNo")).replace("\"", ""));
         details.setInstitutionCode(InstitutionCode);
         details.setIsSuccessful(true);
-       alldetails.add(details);
+        alldetails.add(details);
       
        }
         }
@@ -323,7 +323,7 @@ private String ImageBase;
          List<Transaction> txns = new ArrayList<>();
         try{  
             
-            SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy");
+           SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy");
            SimpleDateFormat ndf = new SimpleDateFormat("yyyyMMdd");
             Date Start = sdf.parse(Startdate);
             Date End = sdf.parse(Enddate);
