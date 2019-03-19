@@ -10,5 +10,18 @@ package primera.service;
  * @author dogor-Igbosuah
  */
 public class CurrentAccountResponse {
+   
+    private String TransRef;
+    private String TransactionDate;
+    private String ResponseCode;
+    private String ResponseText;
+    private String TransactionID;
+   private String Amount;
+   private String Currency;
+   private String Reference;
+   private String InstitutionCode;
+   private Boolean IsSuccessful;
+   private String Message;
+    
     
 }
