@@ -16,8 +16,8 @@ import javax.jws.WebService;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.naming.InitialContext;
-import main.service.T24Link;
 import prm.tools.AppParams;
+import prm.tools.NIBBsResponseCodes;
 
 /**
  *
@@ -31,7 +31,8 @@ private String Ofsuser;
 private String Ofspass;
 AppParams options;
 String logfilename = "PrimeraInterface";
-
+NIBBsResponseCodes nibbsresp;
+String SFactor = "Transaction Successful";
     
     public PrimeraInterface(){
            try
@@ -50,15 +51,11 @@ String logfilename = "PrimeraInterface";
         {
            System.out.println(e.getMessage());
         } 
-    }
-    
-    
-    
-    
+    }  
     
     @WebMethod(operationName = "CurrentAccount")
-    public CurrentAccountResponse CurrentAccount(@WebParam(name = "accountdetails") CurrentAccountRequest accountdetails ) {
-        CurrentAccountResponse accountdetailresp = new CurrentAccountResponse();
+    public ObjectResponse CurrentAccount(@WebParam(name = "accountdetails") CurrentAccountRequest accountdetails ) {
+        ObjectResponse accountdetailresp = new ObjectResponse();
     try {
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm.ss");
         SimpleDateFormat ndf = new SimpleDateFormat("yyyyMMdd");
@@ -68,6 +65,7 @@ String logfilename = "PrimeraInterface";
         String[] ofsoptions = new String[] { "", "I", "PROCESS", "", "0" };
        String[] credentials = new String[] {options.getOfsuser(), options.getOfspass() };
         List<DataItem> items = new LinkedList<>();
+    //List<String> headers = result.get(0);
         
         accountdetails.setValueDate(ndf.format(trandate));
         
@@ -79,12 +77,85 @@ String logfilename = "PrimeraInterface";
                param.setTransaction_id("");
                
                DataItem item = new DataItem();
-                item.setItemHeader("CUSTOMER");
-                item.setItemValues(new String[] {accountdetails.getCustomerNo()});
-                items.add(item);
+               item.setItemHeader("CUSTOMER");
+               item.setItemValues(new String[] {accountdetails.getCustomerNo()});
+               items.add(item);
+               
+               item = new DataItem();
+               item.setItemHeader("ACCOUNT.TITLE");
+               item.setItemValues(new String[] {accountdetails.getAccountName()});
+               items.add(item);
+               
+               item = new DataItem();
+               item.setItemHeader("ACCOUNT.OFFICER");
+               item.setItemValues(new String[] {accountdetails.getBusinessSegmentCode()});
+               items.add(item);
+               
+               item = new DataItem();
+               item.setItemHeader("LIMIT.REF");
+               item.setItemValues(new String[] {accountdetails.getLimitReference()});
+               items.add(item);
+               
+               item = new DataItem();
+               item.setItemHeader("POSTING.RESTRICT");
+               item.setItemValues(new String[] {accountdetails.getBlockedReasons()});
+               items.add(item);
+               
+               item = new DataItem();
+               item.setItemHeader("OPENING.DATE");
+               item.setItemValues(new String[] {accountdetails.getOpeningDate()});
+               items.add(item);
+               
+               item = new DataItem();
+               item.setItemHeader("VALUE.DATE");
+               item.setItemValues(new String[] {accountdetails.getValueDate()});
+               items.add(item);
+               
+               item = new DataItem();
+               item.setItemHeader("ENT.DETAILS");
+               item.setItemValues(new String[] {accountdetails.getIPPISnumber()});
+               items.add(item);
+               
+               item = new DataItem();
+               item.setItemHeader("MIS.CODE");
+               item.setItemValues(new String[] {accountdetails.getBranchLocation()});
+               items.add(item);
+               
+               param.setDataItems(items);
+               
+               String ofstring = t24.generateOFSTransactString(param);
+
+               String result = t24.PostMsg(ofstring);
+               
+               if(t24.IsSuccessful(result)){
+                     
+                   accountdetailresp.setResponseCode("00");
+                   accountdetailresp.setIsSuccessful(true);
+                   accountdetailresp.setMessage(SFactor);
+                   accountdetailresp.setTransactionDate(ndf.format(trandate));
+                 //accountdetailresp.setTransactionID(result.getClass()
+                           
+                 //txn.setTransactionID(result.get(i).get(headers.indexOf("@ID")).replace("\"", "")); 
+               }
+               
+               else{
+               
+               accountdetailresp.setIsSuccessful(false);
+               accountdetailresp.setMessage(result.split("/") [3]);
+             //details(result.split("/")[3]);
+           }
+               
         
         
     } catch (ParseException ex) {
-         Logger.getLogger(PrimeraInterface.class.getName()).log(Level.SEVERE, null, ex);
-     }
+        accountdetailresp.setIsSuccessful(false);
+        accountdetailresp.setMessage(ex.getMessage());
+        
+        
+    }
+        //ogger.getLogger(PrimeraInterface.class.getName()).log(Level.SEVERE, null, e//;
+        
+        return accountdetailresp;
+  
+    }
 }

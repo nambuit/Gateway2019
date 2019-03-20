@@ -5,11 +5,16 @@
  */
 package primera.service;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  *
  * @author dogor-Igbosuah
  */
-public class CurrentAccountResponse {
+
+@Getter @Setter
+public class ObjectResponse {
    
     private String TransRef;
     private String TransactionDate;

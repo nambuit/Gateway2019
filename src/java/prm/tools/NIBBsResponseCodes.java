@@ -58,7 +58,7 @@ package prm.tools;
   Maximum_transaction_amount("0F","Maximum transaction amount permitted to mercahnt exceeded"),
   Maximum_daily_transaction_limit("0G","Maximum daily transaction limit to payer exceeded"),
   Maximum_transaction_amount_permitted("0H","Maximum transaction amount permitted to payer exceeded"),
-  Invalid_BVN("0J","Invalid BNV"),
+  Invalid_BVN("0J","Invalid BVN"),
   More_than_one_BVN("0K","More than one BVN tied to phone number"),
   No_BNV_tied_to_account("0L","No BVN tied to account"),
   N0_account_returned("0M","No account returned"),
