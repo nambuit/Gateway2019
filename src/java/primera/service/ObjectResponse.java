@@ -21,12 +21,12 @@ public class ObjectResponse {
     private String ResponseCode;
     private String ResponseText;
     private String TransactionID;
-   private String Amount;
-   private String Currency;
-   private String Reference;
-   private String InstitutionCode;
-   private Boolean IsSuccessful;
-   private String Message;
+    private String Amount;
+    private String Currency;
+    private String Reference;
+    private String InstitutionCode;
+    private Boolean IsSuccessful;
+    private String Message;
     
     
 }

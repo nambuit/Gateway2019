@@ -390,7 +390,7 @@ private String ImageBase;
            
            List<DataItem> items = new LinkedList<>();
            DataItem item = new DataItem();
-           item.setItemHeader("ACCOUNT.NUMBER");
+           item.setItemHeader("ACCOUNT.NUMBER.1");
            item.setItemValues(new String [] {details.getAccountNumber()});
            items.add(item);
            

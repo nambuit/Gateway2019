@@ -5,10 +5,14 @@
  */
 package primera.service;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  *
  * @author dogor-Igbosuah
  */
+@Getter  @Setter
 public class FundsTransferRequest {
     
     private String DebitCustomer;
@@ -23,6 +27,6 @@ public class FundsTransferRequest {
     private String CreditCustomer;
     private String CreditAccountNo;
     private String CreditRef;
-    private String CustomerDetails;
+   // private String CustomerDetails;
     
 }

@@ -195,7 +195,7 @@ public class T24Link {
 
             String result = output.toString();
 
-            result = result.substring(0,result.length()-2);
+            result = result.substring(0,result.length()-1);
            
 
             return result;

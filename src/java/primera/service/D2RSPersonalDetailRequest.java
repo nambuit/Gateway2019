@@ -33,6 +33,7 @@ public class D2RSPersonalDetailRequest {
     //private String Resident;
     private String CustomerBVNNo;
     private String CustomerReferee;
+    private String GroupName;
     
     
     

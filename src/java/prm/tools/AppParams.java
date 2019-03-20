@@ -65,14 +65,14 @@ public class AppParams {
             OFSsource = (String) ctx.lookup("OFSsource");
             Ofsuser = (String) ctx.lookup("OFSuser");
             Ofspass = (String) ctx.lookup("OFSpass");
-            ImageBase = (String) ctx.lookup("ImageBase");
-            DBuser = (String) ctx.lookup("DBuser");
-            DBpass = (String) ctx.lookup("DBpass");
-            DBserver = (String) ctx.lookup("DBserver");
-            
-                
-            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-            propertiesfile = classLoader.getResourceAsStream("nip/tools/interfacelogger.properties");
+//            ImageBase = (String) ctx.lookup("ImageBase");
+//            DBuser = (String) ctx.lookup("DBuser");
+//            DBpass = (String) ctx.lookup("DBpass");
+//            DBserver = (String) ctx.lookup("DBserver");
+//            
+//                
+//            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+//            propertiesfile = classLoader.getResourceAsStream("nip/tools/interfacelogger.properties");
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
