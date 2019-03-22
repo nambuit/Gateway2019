@@ -154,25 +154,26 @@ public class PrimeraInterface {
                         params1);
                 weblogger.info("The items are " + items);
 
-            } 
-            else {
-                
-               nibbsresp = NIBBsResponseCodes.Security_violation;
-               accountdetailresp.setResponseCode(nibbsresp.getCode());
+            } else {
+
+                nibbsresp = NIBBsResponseCodes.Security_violation;
+                accountdetailresp.setResponseCode(nibbsresp.getCode());
                 accountdetailresp.setResponseText(nibbsresp.getMessage());
+//                accountdetailresp.setTransactionDate(sdf.format(trandate));
+                weblogger.error(accountdetailresp);
                 return accountdetailresp;
             }
-            
-            
+
             String ofstring = t24.generateOFSTransactString(param);
 
             String result = t24.PostMsg(ofstring);
 
             if (t24.IsSuccessful(result)) {
 
-                accountdetailresp.setResponseCode("00");
+                nibbsresp = NIBBsResponseCodes.SUCCESS;
+                accountdetailresp.setResponseCode(nibbsresp.getCode());
                 accountdetailresp.setIsSuccessful(true);
-                accountdetailresp.setMessage(SFactor);
+                accountdetailresp.setMessage(nibbsresp.getMessage());
                 accountdetailresp.setTransactionDate(sdf.format(trandate));
                 //accountdetailresp.setTransactionID(result.getClass()
 
@@ -195,7 +196,6 @@ public class PrimeraInterface {
             accountdetailresp.setMessage(ex.getMessage());
 
         }
-        //ogger.getLogger(PrimeraInterface.class.getName()).log(Level.SEVERE, null, e//;
 
         return accountdetailresp;
 

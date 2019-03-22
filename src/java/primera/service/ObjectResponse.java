@@ -28,7 +28,17 @@ public class ObjectResponse {
     private Boolean IsSuccessful;
     private String Message;
     
+    @Override
+    public String toString() {
+
+        StringBuilder builder = new StringBuilder();
     
+        builder.append("ResponseCode:" + ResponseCode + " ");
+        builder.append("ResponseText:"  + ResponseText + " ");
+        
+        
+        return builder.toString();
+        
     
-    
+}
 }
