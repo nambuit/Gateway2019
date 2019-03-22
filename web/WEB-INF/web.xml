@@ -33,7 +33,12 @@
         <env-entry-name>OFSpass</env-entry-name>
         <env-entry-type>java.lang.String</env-entry-type>
         <env-entry-value>123456</env-entry-value>
-    </env-entry>          
+    </env-entry>         
+    <env-entry>
+        <env-entry-name>LogDir</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>E:\NambuitChannelsLogs</env-entry-value>
+    </env-entry> 
       <env-entry>
         <env-entry-name>ImageBase</env-entry-name>
         <env-entry-type>java.lang.String</env-entry-type>

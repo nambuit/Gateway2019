@@ -28,5 +28,6 @@ public class FundsTransferRequest {
     private String CreditAccountNo;
     private String CreditRef;
    // private String CustomerDetails;
+    private String hash;
     
 }

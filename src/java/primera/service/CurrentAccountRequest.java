@@ -29,6 +29,7 @@ public class CurrentAccountRequest {
     private String ValueDate;
     private String IPPISnumber;
     private String BranchLocation;
+    private String hash;
    
     
     

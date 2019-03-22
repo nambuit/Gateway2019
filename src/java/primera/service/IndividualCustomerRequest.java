@@ -41,4 +41,5 @@ public class IndividualCustomerRequest {
     //private String Resident;
     private String CustomerBVNNo;
     //private String CustomerReferee;
+    private String hash;
 }

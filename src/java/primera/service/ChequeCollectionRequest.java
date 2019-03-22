@@ -25,6 +25,7 @@ public class ChequeCollectionRequest {
     private String DateChequePresented;
     private String ChequeSignedBy;
     private String Comment;
+    private String hash;
     
     
 }

@@ -34,6 +34,7 @@ public class D2RSPersonalDetailRequest {
     private String CustomerBVNNo;
     private String CustomerReferee;
     private String GroupName;
+    private String hash;
     
     
     

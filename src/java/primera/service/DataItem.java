@@ -13,9 +13,23 @@ import lombok.Setter;
  *
  * @author Temitope
  */
-@Getter @Setter 
-public class DataItem {   
-  private String ItemHeader;
+@Getter
+@Setter
+public class DataItem {
 
-  private String[] ItemValues;
+    private String ItemHeader;
+
+    private String[] ItemValues;
+
+    @Override
+    public String toString() {
+
+        StringBuilder builder = new StringBuilder(ItemHeader);
+
+        for (String val : ItemValues) {
+            builder.append(" " + val);
+        }
+        return builder.toString();
+    }
+
 }

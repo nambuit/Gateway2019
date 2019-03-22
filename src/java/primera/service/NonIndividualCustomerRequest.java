@@ -5,10 +5,14 @@
  */
 package primera.service;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  *
  * @author dogor-Igbosuah
  */
+@Getter @Setter
 public class NonIndividualCustomerRequest {
     
     private String NameofEntity;
@@ -29,5 +33,6 @@ public class NonIndividualCustomerRequest {
     private String PrimeraRefer;
     private String RefereeName;
     private String RefereePhoneNo;
+    private String hash;
     
 }
