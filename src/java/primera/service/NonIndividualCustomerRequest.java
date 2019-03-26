@@ -34,5 +34,6 @@ public class NonIndividualCustomerRequest {
     private String RefereeName;
     private String RefereePhoneNo;
     private String hash;
+    private String InterfaceName;
     
 }

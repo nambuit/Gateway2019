@@ -31,6 +31,7 @@ public class MicroCreditRequest {
     private String RefereeName;
     private String RefereePhoneNo;
     private String hash;
+    private String InterfaceName;
     //private String EntityType;
     
 }

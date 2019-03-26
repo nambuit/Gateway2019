@@ -21,6 +21,7 @@ public class CurrentAccountRequest {
     //private String Category;
     //private String Currency;
     private String AccountName;
+    private String TransRef;
     private String BusinessSegmentCode;
     private String AccountMnemonic;
     private String LimitReference;
@@ -30,6 +31,7 @@ public class CurrentAccountRequest {
     private String IPPISnumber;
     private String BranchLocation;
     private String hash;
+    private String InterfaceName;
    
     
     

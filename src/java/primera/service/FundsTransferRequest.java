@@ -29,5 +29,7 @@ public class FundsTransferRequest {
     private String CreditRef;
    // private String CustomerDetails;
     private String hash;
+    private String InterfaceName;
+    private String TransRef;
     
 }

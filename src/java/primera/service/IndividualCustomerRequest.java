@@ -38,6 +38,7 @@ public class IndividualCustomerRequest {
     private String AccountOfficer;
     private String CustomerOpeningDate;
     private String Gender;
+    private String InterfaceName;
     //private String Resident;
     private String CustomerBVNNo;
     //private String CustomerReferee;

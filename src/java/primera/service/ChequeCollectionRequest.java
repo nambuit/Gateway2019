@@ -5,10 +5,15 @@
  */
 package primera.service;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  *
  * @author dogor-Igbosuah
  */
+
+@Getter @Setter
 public class ChequeCollectionRequest {
     
     
@@ -26,6 +31,7 @@ public class ChequeCollectionRequest {
     private String ChequeSignedBy;
     private String Comment;
     private String hash;
+    private String InterfaceName;
     
     
 }
