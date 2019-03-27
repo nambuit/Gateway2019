@@ -14,7 +14,7 @@ package prm.tools;
 
 
 
- public enum NIBBsResponseCodes {
+ public enum ResponseCodes {
   SUCCESS("00","Approved or completed successfully"),
   Status_unknown("01","Status unknown, please wait for settlement report"),
   Invalid_Sender("03","Invalid Sender"),
@@ -71,7 +71,7 @@ package prm.tools;
   
   private String code, message;
  
-    private NIBBsResponseCodes(String value, String message) {
+    private ResponseCodes(String value, String message) {
     this.code = value;
     this.message = message;
     }

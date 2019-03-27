@@ -7,6 +7,9 @@
     <service name="PrimeraInterface">
       <implementation-class>primera.service.PrimeraInterface</implementation-class>
     </service>
+    <service name="PrimeraEnquiryInterface">
+      <implementation-class>primera.service.enquiry.PrimeraEnquiryInterface</implementation-class>
+    </service>
   </services>
   <clients>
     <client name="T24Interface">

@@ -116,30 +116,30 @@ public class AppParams {
         return sb.toString();
     }
 
-    public NIBBsResponseCodes getNIBBsCode(String message) {
+    public ResponseCodes getNIBBsCode(String message) {
 
-        NIBBsResponseCodes respcode = NIBBsResponseCodes.System_malfunction;
+        ResponseCodes respcode = ResponseCodes.System_malfunction;
 
         message = message.toLowerCase();
 
         if (message.contains("ACCOUNT RECORD MISSING".toLowerCase()) || message.contains("found that matched the selection criteria")) {
-            respcode = NIBBsResponseCodes.Invalid_Account;
+            respcode = ResponseCodes.Invalid_Account;
         }
 
         if (message.contains("is inactive")) {
-            respcode = NIBBsResponseCodes.Dormant_Account;
+            respcode = ResponseCodes.Dormant_Account;
         }
 
         if (message.contains("IS FLAGGED FOR ONLINE CLOSURE".toLowerCase())) {
-            respcode = NIBBsResponseCodes.Invalid_Account;
+            respcode = ResponseCodes.Invalid_Account;
         }
 
         if (message.contains("Insolvent".toLowerCase())) {
-            respcode = NIBBsResponseCodes.Do_not_honor;
+            respcode = ResponseCodes.Do_not_honor;
         }
 
         if (message.contains("Unauthorised overdraft".toLowerCase())) {
-            respcode = NIBBsResponseCodes.No_sufficient_funds;
+            respcode = ResponseCodes.No_sufficient_funds;
         }
 
         return respcode;
@@ -200,209 +200,212 @@ public class AppParams {
 //        
 //    }
 //    
-    public NIBBsResponseCodes getResponseObject(String code) {
-        NIBBsResponseCodes respcode;
+    public ResponseCodes getResponseObject(String code) {
+        ResponseCodes respcode;
         switch (code.trim()) {
+            
+            
+            
 
             default:
-                respcode = NIBBsResponseCodes.System_malfunction;
+                respcode = ResponseCodes.System_malfunction;
                 break;
 
             case "00":
 
-                respcode = NIBBsResponseCodes.SUCCESS;
+                respcode = ResponseCodes.SUCCESS;
 
                 break;
 
             case "01":
 
-                respcode = NIBBsResponseCodes.Status_unknown;
+                respcode = ResponseCodes.Status_unknown;
 
                 break;
 
             case "03":
 
-                respcode = NIBBsResponseCodes.Invalid_Sender;
+                respcode = ResponseCodes.Invalid_Sender;
 
                 break;
 
             case "05":
 
-                respcode = NIBBsResponseCodes.Do_not_honor;
+                respcode = ResponseCodes.Do_not_honor;
 
                 break;
 
             case "07":
 
-                respcode = NIBBsResponseCodes.Invalid_Account;
+                respcode = ResponseCodes.Invalid_Account;
 
                 break;
 
             case "08":
 
-                respcode = NIBBsResponseCodes.Account_Name_Mismatch;
+                respcode = ResponseCodes.Account_Name_Mismatch;
 
                 break;
 
             case "09":
 
-                respcode = NIBBsResponseCodes.Request_processing_in_progress;
+                respcode = ResponseCodes.Request_processing_in_progress;
 
                 break;
 
             case "12":
 
-                respcode = NIBBsResponseCodes.Invalid_transaction;
+                respcode = ResponseCodes.Invalid_transaction;
 
                 break;
 
             case "13":
 
-                respcode = NIBBsResponseCodes.Invalid_Amount;
+                respcode = ResponseCodes.Invalid_Amount;
 
                 break;
 
             case "14":
 
-                respcode = NIBBsResponseCodes.Invalid_Batch_Number;
+                respcode = ResponseCodes.Invalid_Batch_Number;
 
                 break;
 
             case "15":
 
-                respcode = NIBBsResponseCodes.Invalid_Session_or_Record_ID;
+                respcode = ResponseCodes.Invalid_Session_or_Record_ID;
 
                 break;
 
             case "16":
 
-                respcode = NIBBsResponseCodes.Unknown_Bank_Code;
+                respcode = ResponseCodes.Unknown_Bank_Code;
 
                 break;
 
             case "17":
 
-                respcode = NIBBsResponseCodes.Invalid_Channel;
+                respcode = ResponseCodes.Invalid_Channel;
 
                 break;
 
             case "18":
 
-                respcode = NIBBsResponseCodes.Wrong_Method_Call;
+                respcode = ResponseCodes.Wrong_Method_Call;
 
                 break;
 
             case "21":
 
-                respcode = NIBBsResponseCodes.No_action_taken;
+                respcode = ResponseCodes.No_action_taken;
 
                 break;
 
             case "25":
 
-                respcode = NIBBsResponseCodes.Unable_to_locate_record;
+                respcode = ResponseCodes.Unable_to_locate_record;
 
                 break;
 
             case "26":
 
-                respcode = NIBBsResponseCodes.Duplicate_record;
+                respcode = ResponseCodes.Duplicate_record;
 
                 break;
 
             case "30":
 
-                respcode = NIBBsResponseCodes.Format_error;
+                respcode = ResponseCodes.Format_error;
 
                 break;
 
             case "35":
 
-                respcode = NIBBsResponseCodes.Contact_sending_bank;
+                respcode = ResponseCodes.Contact_sending_bank;
 
                 break;
 
             case "51":
 
-                respcode = NIBBsResponseCodes.No_sufficient_funds;
+                respcode = ResponseCodes.No_sufficient_funds;
 
                 break;
 
             case "57":
 
-                respcode = NIBBsResponseCodes.Transaction_not_permitted_to_sender;
+                respcode = ResponseCodes.Transaction_not_permitted_to_sender;
 
                 break;
 
             case "58":
 
-                respcode = NIBBsResponseCodes.Transaction_not_permitted_on_channel;
+                respcode = ResponseCodes.Transaction_not_permitted_on_channel;
 
                 break;
 
             case "61":
 
-                respcode = NIBBsResponseCodes.Transfer_limit_Exceeded;
+                respcode = ResponseCodes.Transfer_limit_Exceeded;
 
                 break;
 
             case "63":
 
-                respcode = NIBBsResponseCodes.Security_violation;
+                respcode = ResponseCodes.Security_violation;
 
                 break;
 
             case "65":
 
-                respcode = NIBBsResponseCodes.Exceeds_withdrawal_frequency;
+                respcode = ResponseCodes.Exceeds_withdrawal_frequency;
 
                 break;
 
             case "69":
 
-                respcode = NIBBsResponseCodes.Unsuccessful_Account_Amount_block;
+                respcode = ResponseCodes.Unsuccessful_Account_Amount_block;
 
                 break;
 
             case "70":
 
-                respcode = NIBBsResponseCodes.Unsuccessful_Account_Amount_unblock;
+                respcode = ResponseCodes.Unsuccessful_Account_Amount_unblock;
 
                 break;
 
             case "71":
 
-                respcode = NIBBsResponseCodes.Empty_Mandate_Reference_Number;
+                respcode = ResponseCodes.Empty_Mandate_Reference_Number;
 
                 break;
 
             case "91":
 
-                respcode = NIBBsResponseCodes.Beneficiary_Bank_not_available;
+                respcode = ResponseCodes.Beneficiary_Bank_not_available;
 
                 break;
 
             case "92":
 
-                respcode = NIBBsResponseCodes.Routing_error;
+                respcode = ResponseCodes.Routing_error;
 
                 break;
 
             case "94":
 
-                respcode = NIBBsResponseCodes.Duplicate_transaction;
+                respcode = ResponseCodes.Duplicate_transaction;
 
                 break;
 
             case "96":
 
-                respcode = NIBBsResponseCodes.System_malfunction;
+                respcode = ResponseCodes.System_malfunction;
 
                 break;
 
             case "97":
 
-                respcode = NIBBsResponseCodes.Timeout;
+                respcode = ResponseCodes.Timeout;
 
                 break;
 

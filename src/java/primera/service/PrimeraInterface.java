@@ -18,8 +18,8 @@ import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.naming.InitialContext;
 import prm.tools.AppParams;
-import prm.tools.NIBBsResponseCodes;
 import org.apache.log4j.Logger;
+import prm.tools.ResponseCodes;
 
 /**
  *
@@ -35,7 +35,7 @@ public class PrimeraInterface {
     private String Ofspass;
     AppParams options;
     String logfilename = "PrimeraInterface";
-    NIBBsResponseCodes nibbsresp;
+    ResponseCodes dresp;
 //    String SFactor = "Transaction Successful";
 //    String DEBUG_KEY_METHOD_ENTRY = "METHOD_ENTRY";
 //    String DEBUG_KEY_METHOD_EXIT = "METHOD_EXIT";
@@ -48,7 +48,7 @@ public class PrimeraInterface {
             javax.naming.Context ctx = (javax.naming.Context) new InitialContext().lookup("java:comp/env");
             String Host = (String) ctx.lookup("HOST");
             int port = Integer.parseInt((String) ctx.lookup("PORT"));
-            String OFSsource = (String) ctx.lookup("OFSsource");
+            String OFSsource = (String) ctx.lookup("OFSsource");    
             Ofsuser = (String) ctx.lookup("OFSuser");
             Ofspass = (String) ctx.lookup("OFSpass");
             t24 = new T24Link(Host, port, OFSsource);
@@ -94,7 +94,7 @@ public class PrimeraInterface {
             param.setVersion("ICL.CURR.ACCT");
             param.setOptions(ofsoptions);
             param.setTransaction_id("");
-            if (hash.equals(requesthash) && (intName != null)) {
+            if (hash.equals(requesthash) && (!intName.equals(""))) {
 
                 DataItem item = new DataItem();
                 item.setItemHeader("CUSTOMER");
@@ -146,10 +146,10 @@ public class PrimeraInterface {
 
             } else {
 
-                nibbsresp = NIBBsResponseCodes.Security_violation;
-                accountdetailresp.setResponseCode(nibbsresp.getCode());
-                accountdetailresp.setResponseText(nibbsresp.getMessage());
-//                accountdetailresp.setTransactionDate(sdf.format(trandate));
+                dresp = ResponseCodes.Security_violation;
+                accountdetailresp.setResponseCode(dresp.getCode());
+                accountdetailresp.setResponseText(dresp.getMessage());
+                accountdetailresp.setTransactionDate(sdf.format(trandate));
                 weblogger.error(accountdetailresp);
                 return accountdetailresp;
             }
@@ -158,18 +158,18 @@ public class PrimeraInterface {
             String result = t24.PostMsg(ofstring);
 
             if (t24.IsSuccessful(result)) {
-                nibbsresp = NIBBsResponseCodes.SUCCESS;
+                dresp = ResponseCodes.SUCCESS;
                 accountdetailresp.setTransactionDate(sdf.format(trandate));
-                accountdetailresp.setResponseCode(nibbsresp.getCode());
-                accountdetailresp.setMessage(nibbsresp.getMessage());
+                accountdetailresp.setResponseCode(dresp.getCode());
+                accountdetailresp.setMessage(dresp.getMessage());
                 weblogger.info(accountdetailresp);
 
             } else {
-                nibbsresp = NIBBsResponseCodes.Invalid_transaction;
+                dresp = ResponseCodes.Invalid_transaction;
                 //accountdetailresp.setIsSuccessful(false);
                 //accountdetailresp.setMessage(result.split("/")[3]);
-                accountdetailresp.setResponseCode(nibbsresp.getCode());
-                accountdetailresp.setResponseText(nibbsresp.getMessage());
+                accountdetailresp.setResponseCode(dresp.getCode());
+                accountdetailresp.setResponseText(dresp.getMessage());
                 weblogger.fatal(accountdetailresp);
                 return accountdetailresp;
 //             
@@ -221,7 +221,7 @@ public class PrimeraInterface {
             param.setOptions(ofsoptions);
             param.setTransaction_id("");
 
-            if (hash.equals(requesthash) && (intName != null)) {
+            if (hash.equals(requesthash) && (!intName.equals(""))) {
 
                 DataItem item = new DataItem();
                 item.setItemHeader("DR.FULL.NAME");
@@ -292,9 +292,9 @@ public class PrimeraInterface {
 
                 weblogger.info("The items are " + items);
             } else {
-                nibbsresp = NIBBsResponseCodes.Security_violation;
-                fdetailresp.setResponseCode(nibbsresp.getCode());
-                fdetailresp.setResponseText(nibbsresp.getMessage());
+                dresp = ResponseCodes.Security_violation;
+                fdetailresp.setResponseCode(dresp.getCode());
+                fdetailresp.setResponseText(dresp.getMessage());
 //                accountdetailresp.setTransactionDate(sdf.format(trandate));
                 weblogger.error(fdetailresp);
                 return fdetailresp;
@@ -307,15 +307,15 @@ public class PrimeraInterface {
 
             if (t24.IsSuccessful(result)) {
 
-                nibbsresp = NIBBsResponseCodes.SUCCESS;
-                fdetailresp.setResponseCode(nibbsresp.getCode());
-                fdetailresp.setResponseText(nibbsresp.getMessage());
+                dresp = ResponseCodes.SUCCESS;
+                fdetailresp.setResponseCode(dresp.getCode());
+                fdetailresp.setResponseText(dresp.getMessage());
                 weblogger.info(fdetailresp);
             } else {
 
-                nibbsresp = NIBBsResponseCodes.Invalid_transaction;
-                fdetailresp.setResponseCode(nibbsresp.getCode());
-                fdetailresp.setResponseText(nibbsresp.getMessage());
+                dresp = ResponseCodes.Invalid_transaction;
+                fdetailresp.setResponseCode(dresp.getCode());
+                fdetailresp.setResponseText(dresp.getMessage());
                 weblogger.error(fdetailresp);
                 return fdetailresp;
                 //fdetailresp.setMessage(result.split("/")[3]);
@@ -363,7 +363,7 @@ public class PrimeraInterface {
             param.setOptions(ofsoptions);
             param.setTransaction_id("");
 
-            if (hash.equals(requesthash) && (intName != null)) {
+            if (hash.equals(requesthash) && (!intName.equals(""))) {
 
                 DataItem item = new DataItem();
                 item.setItemHeader("TITLE");
@@ -440,9 +440,9 @@ public class PrimeraInterface {
                 weblogger.info("The items are " + items);
 
             } else {
-                nibbsresp = NIBBsResponseCodes.Security_violation;
-                drobjectresp.setResponseCode(nibbsresp.getCode());
-                drobjectresp.setResponseText(nibbsresp.getMessage());
+                dresp = ResponseCodes.Security_violation;
+                drobjectresp.setResponseCode(dresp.getCode());
+                drobjectresp.setResponseText(dresp.getMessage());
 //                accountdetailresp.setTransactionDate(sdf.format(trandate));
                 weblogger.error(drobjectresp);
                 return drobjectresp;
@@ -454,16 +454,16 @@ public class PrimeraInterface {
 
             if (t24.IsSuccessful(result)) {
 
-                nibbsresp = NIBBsResponseCodes.SUCCESS;
-                drobjectresp.setResponseCode(nibbsresp.getCode());
-                drobjectresp.setResponseText(nibbsresp.getMessage());
+                dresp = ResponseCodes.SUCCESS;
+                drobjectresp.setResponseCode(dresp.getCode());
+                drobjectresp.setResponseText(dresp.getMessage());
                 weblogger.info(drobjectresp);
                 //drobjectresp.setTransactionDate(sdf.format(trandate));
             } else {
-                nibbsresp = NIBBsResponseCodes.Invalid_transaction;
+                dresp = ResponseCodes.Invalid_transaction;
                 //drobjectresp.setMessage(result.split("/")[3]);
-                drobjectresp.setResponseCode(nibbsresp.getCode());
-                drobjectresp.setResponseText(nibbsresp.getMessage());
+                drobjectresp.setResponseCode(dresp.getCode());
+                drobjectresp.setResponseText(dresp.getMessage());
                 //details(result.split("/")[3]);
                 weblogger.error(drobjectresp);
                 return drobjectresp;
@@ -507,7 +507,7 @@ public class PrimeraInterface {
             param.setOptions(ofsoptions);
             param.setTransaction_id("");
 
-            if (hash.equals(requesthash) && (intName != null)) {
+            if (hash.equals(requesthash) && (!intName.equals(""))) {
                 DataItem item = new DataItem();
                 item.setItemHeader("TITLE");
                 item.setItemValues(new String[]{mcdetails.getTitle()});
@@ -593,9 +593,9 @@ public class PrimeraInterface {
                 weblogger.info("The items are " + items);
 
             } else {
-                nibbsresp = NIBBsResponseCodes.Security_violation;
-                mcdetailresp.setResponseCode(nibbsresp.getCode());
-                mcdetailresp.setResponseText(nibbsresp.getMessage());
+                dresp = ResponseCodes.Security_violation;
+                mcdetailresp.setResponseCode(dresp.getCode());
+                mcdetailresp.setResponseText(dresp.getMessage());
 //                accountdetailresp.setTransactionDate(sdf.format(trandate));
                 weblogger.error(mcdetailresp);
                 return mcdetailresp;
@@ -606,14 +606,14 @@ public class PrimeraInterface {
             String result = t24.PostMsg(ofstring);
 
             if (t24.IsSuccessful(result)) {
-                nibbsresp = NIBBsResponseCodes.SUCCESS;
-                mcdetailresp.setResponseCode(nibbsresp.getCode());
-                mcdetailresp.setResponseText(nibbsresp.getMessage());
+                dresp = ResponseCodes.SUCCESS;
+                mcdetailresp.setResponseCode(dresp.getCode());
+                mcdetailresp.setResponseText(dresp.getMessage());
                 weblogger.info(mcdetailresp);
             } else {
-                nibbsresp = NIBBsResponseCodes.Invalid_transaction;
-                mcdetailresp.setResponseCode(nibbsresp.getCode());
-                mcdetailresp.setResponseText(nibbsresp.getMessage());
+                dresp = ResponseCodes.Invalid_transaction;
+                mcdetailresp.setResponseCode(dresp.getCode());
+                mcdetailresp.setResponseText(dresp.getMessage());
                 weblogger.fatal(mcdetailresp);
                 return mcdetailresp;
                 //mcdetailresp.setMessage(result.split("/")[3]);
@@ -661,7 +661,7 @@ public class PrimeraInterface {
             param.setOptions(ofsoptions);
             param.setTransaction_id("");
 
-            if (hash.equals(requesthash) && (intName != null)) {
+            if (hash.equals(requesthash) && (!intName.equals(""))) {
 
                 DataItem item = new DataItem();
                 item.setItemHeader("TITLE");
@@ -778,9 +778,9 @@ public class PrimeraInterface {
                 weblogger.info("The Items are " + items);
 
             } else {
-                nibbsresp = NIBBsResponseCodes.Security_violation;
-                indetailresp.setResponseCode(nibbsresp.getCode());
-                indetailresp.setResponseText(nibbsresp.getMessage());
+                dresp = ResponseCodes.Security_violation;
+                indetailresp.setResponseCode(dresp.getCode());
+                indetailresp.setResponseText(dresp.getMessage());
                 weblogger.error(indetailresp);
                 return indetailresp;
             }
@@ -791,15 +791,15 @@ public class PrimeraInterface {
 
             if (t24.IsSuccessful(result)) {
 
-                nibbsresp = NIBBsResponseCodes.SUCCESS;
-                indetailresp.setResponseCode(nibbsresp.getCode());
-                indetailresp.setResponseText(nibbsresp.getMessage());
+                dresp = ResponseCodes.SUCCESS;
+                indetailresp.setResponseCode(dresp.getCode());
+                indetailresp.setResponseText(dresp.getMessage());
                 weblogger.info(indetailresp);
             } else {
 
-                nibbsresp = NIBBsResponseCodes.Invalid_transaction;
-                indetailresp.setResponseCode(nibbsresp.getCode());
-                indetailresp.setResponseText(nibbsresp.getMessage());
+                dresp = ResponseCodes.Invalid_transaction;
+                indetailresp.setResponseCode(dresp.getCode());
+                indetailresp.setResponseText(dresp.getMessage());
                 weblogger.fatal(indetailresp);
                 return indetailresp;
                 //indetailresp.setMessage(result.split("/")[3]);
@@ -848,7 +848,7 @@ public class PrimeraInterface {
             param.setOptions(ofsoptions);
             param.setTransaction_id("");
 
-            if (hash.equals(requesthash) && (intName != null)) {
+            if (hash.equals(requesthash) && (!intName.equals(""))) {
 
                 DataItem item = new DataItem();
                 item.setItemHeader("SHORT.NAME");
@@ -919,9 +919,9 @@ public class PrimeraInterface {
 
                 weblogger.info("The items are " + items);
             } else {
-                nibbsresp = NIBBsResponseCodes.Security_violation;
-                nindetailresp.setResponseCode(nibbsresp.getCode());
-                nindetailresp.setResponseText(nibbsresp.getMessage());
+                dresp = ResponseCodes.Security_violation;
+                nindetailresp.setResponseCode(dresp.getCode());
+                nindetailresp.setResponseText(dresp.getMessage());
                 weblogger.error(nindetailresp);
                 return nindetailresp;
 
@@ -933,16 +933,16 @@ public class PrimeraInterface {
 
             if (t24.IsSuccessful(result)) {
 
-                nibbsresp = NIBBsResponseCodes.SUCCESS;
-                nindetailresp.setResponseCode(nibbsresp.getCode());
-                nindetailresp.setResponseText(nibbsresp.getMessage());
+                dresp = ResponseCodes.SUCCESS;
+                nindetailresp.setResponseCode(dresp.getCode());
+                nindetailresp.setResponseText(dresp.getMessage());
                 nindetailresp.setTransactionDate(sdf.format(trandate));
                 weblogger.info(nindetailresp);
             } else {
 
-                nibbsresp = NIBBsResponseCodes.Invalid_transaction;
-                nindetailresp.setResponseCode(nibbsresp.getCode());
-                nindetailresp.setResponseText(nibbsresp.getMessage());
+                dresp = ResponseCodes.Invalid_transaction;
+                nindetailresp.setResponseCode(dresp.getCode());
+                nindetailresp.setResponseText(dresp.getMessage());
                 nindetailresp.setTransactionDate(sdf.format(trandate));
                 weblogger.fatal(nindetailresp);
                 return nindetailresp;
@@ -976,12 +976,15 @@ public class PrimeraInterface {
 
             Date trandate = sdf.parse(loansdeposits.getValueDate());
             Date transdate = sdf.parse(loansdeposits.getMaturityDate());
+            Date tramdate = sdf.parse (loansdeposits.getLoanApprovedDate());
+            
             String[] ofsoptions = new String[]{"", "I", "PROCESS", "", "0"};
             String[] credentials = new String[]{Ofsuser, Ofspass};
             List<DataItem> items = new LinkedList<>();
 
             loansdeposits.setValueDate(ndf.format(trandate));
             loansdeposits.setMaturityDate(ndf.format(transdate));
+            loansdeposits.setLoanApprovedDate(ndf.format(tramdate));
 
             ofsParam param = new ofsParam();
             param.setCredentials(credentials);
@@ -989,7 +992,7 @@ public class PrimeraInterface {
             param.setVersion("ABJ.LOANS");
             param.setOptions(ofsoptions);
             param.setTransaction_id("");
-            if (hash.equals(requesthash) && (intName != null)) {
+            if (hash.equals(requesthash) && (!intName.equals(""))) {
                 DataItem item = new DataItem();
                 item.setItemHeader("LOAN.APPL.ID");
                 item.setItemValues(new String[]{loansdeposits.getLoanApplicationID()});
@@ -1054,9 +1057,9 @@ public class PrimeraInterface {
                 weblogger.info("The items are " + items);
 
             } else {
-                nibbsresp = NIBBsResponseCodes.Security_violation;
-                loansdepositsresp.setResponseCode(nibbsresp.getCode());
-                loansdepositsresp.setResponseText(nibbsresp.getMessage());
+                dresp = ResponseCodes.Security_violation;
+                loansdepositsresp.setResponseCode(dresp.getCode());
+                loansdepositsresp.setResponseText(dresp.getMessage());
                 loansdepositsresp.setTransactionDate(sdf.format(trandate));
                 weblogger.error(loansdepositsresp);
                 return loansdepositsresp;
@@ -1067,17 +1070,17 @@ public class PrimeraInterface {
             String result = t24.PostMsg(ofstring);
 
             if (t24.IsSuccessful(result)) {
-                nibbsresp = NIBBsResponseCodes.SUCCESS;
-                loansdepositsresp.setResponseCode(nibbsresp.getCode());
-                loansdepositsresp.setResponseText(nibbsresp.getMessage());
+                dresp = ResponseCodes.SUCCESS;
+                loansdepositsresp.setResponseCode(dresp.getCode());
+                loansdepositsresp.setResponseText(dresp.getMessage());
                 loansdepositsresp.setTransactionDate(sdf.format(trandate));
                 weblogger.info(loansdepositsresp);
 
             } else {
 
-                nibbsresp = NIBBsResponseCodes.Invalid_transaction;
-                loansdepositsresp.setResponseCode(nibbsresp.getCode());
-                loansdepositsresp.setResponseText(nibbsresp.getMessage());
+                dresp = ResponseCodes.Invalid_transaction;
+                loansdepositsresp.setResponseCode(dresp.getCode());
+                loansdepositsresp.setResponseText(dresp.getMessage());
                 loansdepositsresp.setTransactionDate(sdf.format(trandate));
                 weblogger.fatal(loansdepositsresp);
                 return loansdepositsresp;
@@ -1126,7 +1129,7 @@ public class PrimeraInterface {
             param.setOptions(ofsoptions);
             param.setTransaction_id("");
 
-            if (hash.equals(requesthash) && (intName != null)) {
+            if (hash.equals(requesthash) && (!intName.equals(""))) {
                 DataItem item = new DataItem();
                 item.setItemHeader("LOAN.APPL.ID");
                 item.setItemValues(new String[]{icldeposit.getLoanApplicationID()});
@@ -1187,9 +1190,9 @@ public class PrimeraInterface {
                 weblogger.info("The items are " + items);
 
             } else {
-                nibbsresp = NIBBsResponseCodes.Security_violation;
-                icldepositresp.setResponseCode(nibbsresp.getCode());
-                icldepositresp.setResponseText(nibbsresp.getMessage());
+                dresp = ResponseCodes.Security_violation;
+                icldepositresp.setResponseCode(dresp.getCode());
+                icldepositresp.setResponseText(dresp.getMessage());
                 icldepositresp.setTransactionDate(sdf.format(trandate));
                 weblogger.error(icldepositresp);
                 return icldepositresp;
@@ -1200,16 +1203,16 @@ public class PrimeraInterface {
             String result = t24.PostMsg(ofstring);
 
             if (t24.IsSuccessful(result)) {
-                nibbsresp = NIBBsResponseCodes.SUCCESS;
-                icldepositresp.setResponseCode(nibbsresp.getCode());
-                icldepositresp.setResponseText(nibbsresp.getMessage());
+                dresp = ResponseCodes.SUCCESS;
+                icldepositresp.setResponseCode(dresp.getCode());
+                icldepositresp.setResponseText(dresp.getMessage());
                 icldepositresp.setTransactionDate(sdf.format(trandate));
                 weblogger.info(icldepositresp);
             } else {
 
-                nibbsresp = NIBBsResponseCodes.Invalid_transaction;
-                icldepositresp.setResponseCode(nibbsresp.getCode());
-                icldepositresp.setResponseText(nibbsresp.getMessage());
+                dresp = ResponseCodes.Invalid_transaction;
+                icldepositresp.setResponseCode(dresp.getCode());
+                icldepositresp.setResponseText(dresp.getMessage());
                 icldepositresp.setTransactionDate(sdf.format(trandate));
                 weblogger.fatal(icldepositresp);
                 return icldepositresp;
@@ -1262,7 +1265,7 @@ public class PrimeraInterface {
             param.setOptions(ofsoptions);
             param.setTransaction_id("");
 
-            if (hash.equals(requesthash) && (intName != null)) {
+            if (hash.equals(requesthash) && (!intName.equals(""))) {
 
                 DataItem item = new DataItem();
                 item.setItemHeader("LOAN.APPL.ID");
@@ -1349,9 +1352,9 @@ public class PrimeraInterface {
                 weblogger.info("The items are " + items);
 
             } else {
-                nibbsresp = NIBBsResponseCodes.Security_violation;
-                pubdepositresp.setResponseCode(nibbsresp.getCode());
-                pubdepositresp.setResponseText(nibbsresp.getMessage());
+                dresp = ResponseCodes.Security_violation;
+                pubdepositresp.setResponseCode(dresp.getCode());
+                pubdepositresp.setResponseText(dresp.getMessage());
                 pubdepositresp.setTransactionDate(sdf.format(trandate));
                 weblogger.error(pubdepositresp);
                 return pubdepositresp;
@@ -1363,16 +1366,16 @@ public class PrimeraInterface {
             String result = t24.PostMsg(ofstring);
 
             if (t24.IsSuccessful(result)) {
-                nibbsresp = NIBBsResponseCodes.SUCCESS;
-                pubdepositresp.setResponseCode(nibbsresp.getCode());
-                pubdepositresp.setResponseText(nibbsresp.getMessage());
+                dresp = ResponseCodes.SUCCESS;
+                pubdepositresp.setResponseCode(dresp.getCode());
+                pubdepositresp.setResponseText(dresp.getMessage());
                 pubdepositresp.setTransactionDate(sdf.format(trandate));
                 weblogger.info(pubdepositresp);
 
             } else {
-                nibbsresp = NIBBsResponseCodes.Invalid_transaction;
-                pubdepositresp.setResponseCode(nibbsresp.getCode());
-                pubdepositresp.setResponseText(nibbsresp.getMessage());
+                dresp = ResponseCodes.Invalid_transaction;
+                pubdepositresp.setResponseCode(dresp.getCode());
+                pubdepositresp.setResponseText(dresp.getMessage());
                 pubdepositresp.setTransactionDate(sdf.format(trandate));
                 weblogger.fatal(pubdepositresp);
                 return pubdepositresp;
@@ -1424,7 +1427,7 @@ public class PrimeraInterface {
             param.setOptions(ofsoptions);
             param.setTransaction_id("");
 
-            if (hash.equals(requesthash) && (intName != null)) {
+            if (hash.equals(requesthash) && (!intName.equals(""))) {
                 DataItem item = new DataItem();
                 item.setItemHeader("LOAN.APPL.ID");
                 item.setItemValues(new String[]{statedeposit.getLoanApplicationID()});
@@ -1510,9 +1513,9 @@ public class PrimeraInterface {
                 weblogger.info("The items are " + items);
 
             } else {
-                nibbsresp = NIBBsResponseCodes.Security_violation;
-                statedepositresp.setResponseCode(nibbsresp.getCode());
-                statedepositresp.setResponseText(nibbsresp.getMessage());
+                dresp = ResponseCodes.Security_violation;
+                statedepositresp.setResponseCode(dresp.getCode());
+                statedepositresp.setResponseText(dresp.getMessage());
                 statedepositresp.setTransactionDate(sdf.format(trandate));
                 weblogger.error(statedepositresp);
                 return statedepositresp;
@@ -1524,16 +1527,16 @@ public class PrimeraInterface {
 
             if (t24.IsSuccessful(result)) {
 
-                nibbsresp = NIBBsResponseCodes.SUCCESS;
-                statedepositresp.setResponseCode(nibbsresp.getCode());
-                statedepositresp.setResponseText(nibbsresp.getMessage());
+                dresp = ResponseCodes.SUCCESS;
+                statedepositresp.setResponseCode(dresp.getCode());
+                statedepositresp.setResponseText(dresp.getMessage());
                 statedepositresp.setTransactionDate(sdf.format(trandate));
                 weblogger.info(statedepositresp);
 
             } else {
-                nibbsresp = NIBBsResponseCodes.Invalid_transaction;
-                statedepositresp.setResponseCode(nibbsresp.getCode());
-                statedepositresp.setResponseText(nibbsresp.getMessage());
+                dresp = ResponseCodes.Invalid_transaction;
+                statedepositresp.setResponseCode(dresp.getCode());
+                statedepositresp.setResponseText(dresp.getMessage());
                 statedepositresp.setTransactionDate(sdf.format(trandate));
                 weblogger.fatal(statedepositresp);
                 return statedepositresp;
@@ -1583,7 +1586,7 @@ public class PrimeraInterface {
             param.setOptions(ofsoptions);
             param.setTransaction_id("");
 
-            if (hash.equals(requesthash) && (intName != null)) {
+            if (hash.equals(requesthash) && (!intName.equals(""))) {
                 DataItem item = new DataItem();
                 item.setItemHeader("LD.NUMBER");
                 item.setItemValues(new String[]{chequecollect.getCustomerLoanNo()});
@@ -1640,9 +1643,9 @@ public class PrimeraInterface {
                 weblogger.info("The items are " + items);
 
             } else {
-                nibbsresp = NIBBsResponseCodes.Security_violation;
-                chequecollectresp.setResponseCode(nibbsresp.getCode());
-                chequecollectresp.setResponseText(nibbsresp.getMessage());
+                dresp = ResponseCodes.Security_violation;
+                chequecollectresp.setResponseCode(dresp.getCode());
+                chequecollectresp.setResponseText(dresp.getMessage());
                 chequecollectresp.setTransactionDate(sdf.format(trandate));
                 weblogger.error(chequecollectresp);
                 return chequecollectresp;
@@ -1654,16 +1657,16 @@ public class PrimeraInterface {
 
             if (t24.IsSuccessful(result)) {
 
-                nibbsresp = NIBBsResponseCodes.SUCCESS;
-                chequecollectresp.setResponseCode(nibbsresp.getCode());
-                chequecollectresp.setResponseText(nibbsresp.getMessage());
+                dresp = ResponseCodes.SUCCESS;
+                chequecollectresp.setResponseCode(dresp.getCode());
+                chequecollectresp.setResponseText(dresp.getMessage());
                 chequecollectresp.setTransactionDate(sdf.format(trandate));
                 weblogger.info(chequecollectresp);
 
             } else {
-                nibbsresp = NIBBsResponseCodes.Invalid_transaction;
-                chequecollectresp.setResponseCode(nibbsresp.getCode());
-                chequecollectresp.setResponseText(nibbsresp.getMessage());
+                dresp = ResponseCodes.Invalid_transaction;
+                chequecollectresp.setResponseCode(dresp.getCode());
+                chequecollectresp.setResponseText(dresp.getMessage());
                 chequecollectresp.setTransactionDate(sdf.format(trandate));
                 weblogger.fatal(chequecollectresp);
                 return chequecollectresp;

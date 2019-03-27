@@ -21,8 +21,8 @@ public class Function {
     public String APIKey = "4466FA2C-1886-4366-B014-AD140712BE38";
     
     
-  public Function(){
-  }
+//  public Function(){
+//  }
       
     
    public static void main (String [] args){
@@ -37,7 +37,7 @@ public class Function {
         try {
             AppParams options = new AppParams();
             CurrentAccountRequest cacc = new CurrentAccountRequest();
-            String stringtohash = "059049039" + "09409390" ;
+            String stringtohash = "FT40494049404" ;
             String hash = options.get_SHA_512_Hash(stringtohash, APIKey);
             System.out.println(hash);
         } catch (Exception ex) {
