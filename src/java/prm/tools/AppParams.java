@@ -5,8 +5,6 @@ package prm.tools;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
-
 import com.google.gson.Gson;
 import com.sun.xml.bind.StringInputStream;
 import java.io.InputStream;
@@ -17,6 +15,7 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
 import javax.naming.InitialContext;
@@ -25,7 +24,7 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import lombok.Getter;
 import lombok.Setter;
-
+import org.apache.log4j.Level;
 
 /**
  *
@@ -61,7 +60,7 @@ public class AppParams {
             javax.naming.Context ctx = (javax.naming.Context) new InitialContext().lookup("java:comp/env");
             Host = (String) ctx.lookup("HOST");
             port = Integer.parseInt((String) ctx.lookup("PORT"));
-            
+
             OFSsource = (String) ctx.lookup("OFSsource");
             Ofsuser = (String) ctx.lookup("OFSuser");
             Ofspass = (String) ctx.lookup("OFSpass");
@@ -79,11 +78,46 @@ public class AppParams {
         }
 
     }
- 
 
-    public static String escape(String text) {
+    public String escape(String text) {
 
-        return text.replace("&", "&amp;").replace("\"", "&quot;").replace("'", "&apos;").replace("<", "&lt;").replace(">", "&gt;");
+        return text.replace(",", "?").replace("\"", "&quot;").replace("'", "&apos;").replace("<", "&lt;").replace(">", "&gt;");
+    }
+
+    public double Amount1(int loanamt, int tenor) {
+        return (loanamt / tenor);
+    }
+
+    public double Repayment(int loanamt, double interestrate) {
+        double TotalRepayment = (interestrate / 100 * loanamt);
+        return loanamt + TotalRepayment;
+    }
+    
+    
+    public double TotalInstallments(int loanamt, double interestrate) {
+        double TotalRepayment = (interestrate / 100 * loanamt);
+        return TotalRepayment;
+    }
+
+    public double Amount2(double intrate, int tenor, int principal) {
+        double InterestRate = (intrate / tenor);
+        return (principal * InterestRate / 100);
+    }
+
+    public int monthsBetween(Date a, Date b) {
+        Calendar cal = Calendar.getInstance();
+        if (a.before(b)) {
+            cal.setTime(a);
+        } else {
+            cal.setTime(b);
+            b = a;
+        }
+        int c = 0;
+        while (cal.getTime().before(b)) {
+            cal.add(Calendar.MONTH, 1);
+            c++;
+        }
+        return c;
     }
 
     public String generateSessionID(String instcode) {
@@ -145,8 +179,6 @@ public class AppParams {
         return respcode;
     }
 
-   
-
     public String get_SHA_512_Hash(String StringToHash, String salt) throws Exception {
         String generatedPassword = null;
         try {
@@ -203,9 +235,6 @@ public class AppParams {
     public ResponseCodes getResponseObject(String code) {
         ResponseCodes respcode;
         switch (code.trim()) {
-            
-            
-            
 
             default:
                 respcode = ResponseCodes.System_malfunction;
@@ -414,8 +443,34 @@ public class AppParams {
         return respcode;
     }
 
+    public Object XMLToObject(String xml, Object object) throws Exception {
+        try {
+            JAXBContext jcontext = JAXBContext.newInstance(object.getClass());
+            Unmarshaller um = jcontext.createUnmarshaller();
 
-    
+            //InputSource source = new InputSource(new StringReader(xml));
+            return um.unmarshal(new StringInputStream(xml));
 
-    
+        } catch (Exception y) {
+            throw (y);
+        }
+    }
+
+    public String ObjectToXML(Object object) {
+        try {
+            JAXBContext jcontext = JAXBContext.newInstance(object.getClass());
+            Marshaller m = jcontext.createMarshaller();
+            m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+            StringWriter sw = new StringWriter();
+
+            m.marshal(object, sw);
+
+            return sw.toString();
+        } catch (Exception y) {
+
+            return "";
+        }
+
+    }
+
 }

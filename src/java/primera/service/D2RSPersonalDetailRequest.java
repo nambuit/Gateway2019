@@ -26,6 +26,8 @@ public class D2RSPersonalDetailRequest {
     private String Sector;
     //private String Age;
     private String Mnemonic;
+    private String HomeAddress;
+    private String LoanType;
     private String Industry; 
     private String LoanOfficer;
     private String DateofEvaluation;

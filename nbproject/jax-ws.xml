@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jax-ws xmlns="http://www.netbeans.org/ns/jax-ws/1">
   <services>
-    <service name="T24Interface">
-      <implementation-class>main.service.T24Interface</implementation-class>
-    </service>
     <service name="PrimeraInterface">
       <implementation-class>primera.service.PrimeraInterface</implementation-class>
     </service>
     <service name="PrimeraEnquiryInterface">
-      <implementation-class>primera.service.enquiry.PrimeraEnquiryInterface</implementation-class>
+      <implementation-class>service.enquiry.PrimeraEnquiryInterface</implementation-class>
+    </service>
+    <service name="T24Interface">
+      <implementation-class>main.service.latest.T24Interface</implementation-class>
     </service>
   </services>
   <clients>
     <client name="T24Interface">
-      <wsdl-url>http://dogor-fbu:8080/PrimeraGateway/T24Interface?wsdl</wsdl-url>
-      <local-wsdl-file>dogor-fbu_8080/PrimeraGateway/T24Interface.wsdl</local-wsdl-file>
-      <package-name>com.service</package-name>
+      <wsdl-url>http://applicationsvr:8080/PrimeraGateway/T24Interface?wsdl</wsdl-url>
+      <local-wsdl-file>applicationsvr_8080/PrimeraGateway/T24Interface.wsdl</local-wsdl-file>
+      <package-name>main.service</package-name>
       <catalog-file>catalog.xml</catalog-file>
       <wsimport-options>
         <wsimport-option>
@@ -32,7 +32,7 @@
         </wsimport-option>
         <wsimport-option>
           <wsimport-option-name>wsdlLocation</wsimport-option-name>
-          <wsimport-option-value>http://dogor-fbu:8080/PrimeraGateway/T24Interface?wsdl</wsimport-option-value>
+          <wsimport-option-value>http://applicationsvr:8080/PrimeraGateway/T24Interface?wsdl</wsimport-option-value>
         </wsimport-option>
         <wsimport-option>
           <wsimport-option-name>xnocompile</wsimport-option-name>

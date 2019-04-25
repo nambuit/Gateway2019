@@ -5,9 +5,10 @@
  */
 package primera.service;
 
-import com.common.service.util.logging.LogService;
+//import com.common.service.util.logging.LogService;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,10 +30,12 @@ import prm.tools.ResponseCodes;
 public class PrimeraInterface {
 
     Logger weblogger = Logger.getLogger(PrimeraInterface.class.getName());
-    LogService logger = LogService.getLogger();
+    //LogService logger = LogService.getLogger();
     T24Link t24;
     private String Ofsuser;
     private String Ofspass;
+    private String Authuser;
+    private String Authpass;
     AppParams options;
     String logfilename = "PrimeraInterface";
     ResponseCodes dresp;
@@ -48,9 +51,11 @@ public class PrimeraInterface {
             javax.naming.Context ctx = (javax.naming.Context) new InitialContext().lookup("java:comp/env");
             String Host = (String) ctx.lookup("HOST");
             int port = Integer.parseInt((String) ctx.lookup("PORT"));
-            String OFSsource = (String) ctx.lookup("OFSsource");    
+            String OFSsource = (String) ctx.lookup("OFSsource");
             Ofsuser = (String) ctx.lookup("OFSuser");
             Ofspass = (String) ctx.lookup("OFSpass");
+            Authuser = (String) ctx.lookup("AUTHuser");
+            Authpass = (String) ctx.lookup("AUTHpass");
             t24 = new T24Link(Host, port, OFSsource);
             options = new AppParams();
 
@@ -59,10 +64,10 @@ public class PrimeraInterface {
         }
     }
 
-    @WebMethod(operationName = "CurrentAccount")
-    public ObjectResponse CurrentAccount(@WebParam(name = "accountdetails") CurrentAccountRequest accountdetails) throws Exception {
+    @WebMethod(operationName = "LoanAccount")
+    public ObjectResponse LoanAccount(@WebParam(name = "accountdetails") CurrentAccountRequest accountdetails) throws Exception {
         ObjectResponse accountdetailresp = new ObjectResponse();
-        weblogger.info("CurrentAccount");
+        weblogger.info("LoanAccount");
 
         try {
 
@@ -76,14 +81,17 @@ public class PrimeraInterface {
 
             SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
             SimpleDateFormat ndf = new SimpleDateFormat("yyyyMMdd");
+            SimpleDateFormat zzdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
             Date trandate = sdf.parse(accountdetails.getValueDate());
             Date transdate = sdf.parse(accountdetails.getOpeningDate());
+            Date today = Calendar.getInstance().getTime();
+
             String[] ofsoptions = new String[]{"", "I", "PROCESS", "", "0"};
             String[] credentials = new String[]{Ofsuser, Ofspass};
             List<DataItem> items = new LinkedList<>();
-            //List<String> headers = result.get(0);0
 
+            //List<String> headers = result.get(0);0
             accountdetails.setValueDate(ndf.format(trandate));
             accountdetails.setOpeningDate(ndf.format(transdate));
 
@@ -104,6 +112,16 @@ public class PrimeraInterface {
                 item = new DataItem();
                 item.setItemHeader("ACCOUNT.TITLE.1");
                 item.setItemValues(new String[]{accountdetails.getAccountName()});
+                items.add(item);
+
+                item = new DataItem();
+                item.setItemHeader("CURRENCY");
+                item.setItemValues(new String[]{accountdetails.getCurrency()});
+                items.add(item);
+
+                item = new DataItem();
+                item.setItemHeader("CATEGORY");
+                item.setItemValues(new String[]{accountdetails.getCategory()});
                 items.add(item);
 
                 item = new DataItem();
@@ -149,7 +167,7 @@ public class PrimeraInterface {
                 dresp = ResponseCodes.Security_violation;
                 accountdetailresp.setResponseCode(dresp.getCode());
                 accountdetailresp.setResponseText(dresp.getMessage());
-                accountdetailresp.setTransactionDate(sdf.format(trandate));
+                accountdetailresp.setTransactionDate(zzdf.format(today));
                 weblogger.error(accountdetailresp);
                 return accountdetailresp;
             }
@@ -159,7 +177,8 @@ public class PrimeraInterface {
 
             if (t24.IsSuccessful(result)) {
                 dresp = ResponseCodes.SUCCESS;
-                accountdetailresp.setTransactionDate(sdf.format(trandate));
+                accountdetailresp.setTransactionID(result.split("/")[0]);
+                accountdetailresp.setTransactionDate(zzdf.format(today));
                 accountdetailresp.setResponseCode(dresp.getCode());
                 accountdetailresp.setMessage(dresp.getMessage());
                 weblogger.info(accountdetailresp);
@@ -167,9 +186,10 @@ public class PrimeraInterface {
             } else {
                 dresp = ResponseCodes.Invalid_transaction;
                 //accountdetailresp.setIsSuccessful(false);
-                //accountdetailresp.setMessage(result.split("/")[3]);
+                accountdetailresp.setMessage(result.split("/")[3]);
                 accountdetailresp.setResponseCode(dresp.getCode());
                 accountdetailresp.setResponseText(dresp.getMessage());
+                accountdetailresp.setTransactionDate(zzdf.format(today));
                 weblogger.fatal(accountdetailresp);
                 return accountdetailresp;
 //             
@@ -189,11 +209,11 @@ public class PrimeraInterface {
 
     }
 
-    @WebMethod(operationName = "FundTransfer")
-    public ObjectResponse FundTransfer(@WebParam(name = "fdetails") FundsTransferRequest fdetails) throws ParseException, Exception {
+    @WebMethod(operationName = "AccountTransfer")
+    public ObjectResponse AccountTransfer(@WebParam(name = "fdetails") FundsTransferRequest fdetails) throws ParseException, Exception {
 
         ObjectResponse fdetailresp = new ObjectResponse();
-        weblogger.info("FundTransfer");
+        weblogger.info("AccountTransfer");
         try {
 
             String stringtohash = fdetails.getCreditAccountNo() + fdetails.getDebitAccountNo();
@@ -205,6 +225,7 @@ public class PrimeraInterface {
             String hash = options.get_SHA_512_Hash(stringtohash, APIKey);
             SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
             SimpleDateFormat ndf = new SimpleDateFormat("yyyyMMdd");
+            SimpleDateFormat zzdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
             Date trandate = sdf.parse(fdetails.getDRValueDate());
             //Date transdate = sdf.parse(fdetails.getOpeningDate());
@@ -228,14 +249,17 @@ public class PrimeraInterface {
                 item.setItemValues(new String[]{fdetails.getDebitCustomer()});
                 items.add(item);
 
+//                item = new DataItem();
+//                item.setItemHeader("DR.WORK.BAL");
+//                item.setItemValues(new String[]{fdetails.getAccountBalance()});
+//                items.add(item);
+//                item = new DataItem();
+//                item.setItemHeader("CONS.DISCLOSE");
+//                item.setItemValues(new String[]{fdetails.getSignInstructions()});
+//                items.add(item);
                 item = new DataItem();
-                item.setItemHeader("DR.WORK.BAL");
-                item.setItemValues(new String[]{fdetails.getAccountBalance()});
-                items.add(item);
-
-                item = new DataItem();
-                item.setItemHeader("CONS.DISCLOSE");
-                item.setItemValues(new String[]{fdetails.getSignInstructions()});
+                item.setItemHeader("DEBIT.CURRENCY");
+                item.setItemValues(new String[]{fdetails.getCurrency()});
                 items.add(item);
 
                 item = new DataItem();
@@ -263,16 +287,14 @@ public class PrimeraInterface {
                 item.setItemValues(new String[]{fdetails.getOrderedBy()});
                 items.add(item);
 
-                item = new DataItem();
-                item.setItemHeader("PROFIT.CENTRE.DEPT");
-                item.setItemValues(new String[]{fdetails.getCostCenter()});
-                items.add(item);
-
-                item = new DataItem();
-                item.setItemHeader("CR.FULL.NAME");
-                item.setItemValues(new String[]{fdetails.getCreditCustomer()});
-                items.add(item);
-
+//                item = new DataItem();
+//                item.setItemHeader("PROFIT.CENTRE.DEPT");
+//                item.setItemValues(new String[]{fdetails.getCostCenter()});
+//                items.add(item);
+//                item = new DataItem();
+//                item.setItemHeader("CR.FULL.NAME");
+//                item.setItemValues(new String[]{fdetails.getCreditCustomer()});
+//                items.add(item);
                 item = new DataItem();
                 item.setItemHeader("CREDIT.ACCT.NO");
                 item.setItemValues(new String[]{fdetails.getCreditAccountNo()});
@@ -295,7 +317,7 @@ public class PrimeraInterface {
                 dresp = ResponseCodes.Security_violation;
                 fdetailresp.setResponseCode(dresp.getCode());
                 fdetailresp.setResponseText(dresp.getMessage());
-//                accountdetailresp.setTransactionDate(sdf.format(trandate));
+                fdetailresp.setTransactionDate(sdf.format(trandate));
                 weblogger.error(fdetailresp);
                 return fdetailresp;
 
@@ -304,21 +326,25 @@ public class PrimeraInterface {
             String ofstring = t24.generateOFSTransactString(param);
 
             String result = t24.PostMsg(ofstring);
-
+            Date today = Calendar.getInstance().getTime();
             if (t24.IsSuccessful(result)) {
 
                 dresp = ResponseCodes.SUCCESS;
+                fdetailresp.setTransactionID(result.split("/")[0]);
                 fdetailresp.setResponseCode(dresp.getCode());
                 fdetailresp.setResponseText(dresp.getMessage());
+                fdetailresp.setTransactionDate(zzdf.format(today));
                 weblogger.info(fdetailresp);
             } else {
 
                 dresp = ResponseCodes.Invalid_transaction;
+                fdetailresp.setMessage(result.split("/")[3]);
                 fdetailresp.setResponseCode(dresp.getCode());
                 fdetailresp.setResponseText(dresp.getMessage());
+                fdetailresp.setTransactionDate(zzdf.format(today));
                 weblogger.error(fdetailresp);
                 return fdetailresp;
-                //fdetailresp.setMessage(result.split("/")[3]);
+
                 //details(result.split("/")[3]);
             }
 
@@ -348,13 +374,16 @@ public class PrimeraInterface {
 
             SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
             SimpleDateFormat ndf = new SimpleDateFormat("yyyyMMdd");
-
+            SimpleDateFormat zzdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+            Date today = Calendar.getInstance().getTime();
             Date trandate = sdf.parse(drdetails.getDateofEvaluation());
+            Date trandates = sdf.parse(drdetails.getDateofBirth());
             //Date transdate = sdf.parse(fdetails.getOpeningDate());
             String[] ofsoptions = new String[]{"", "I", "PROCESS", "", "0"};
             String[] credentials = new String[]{Ofsuser, Ofspass};
             List<DataItem> items = new LinkedList<>();
             drdetails.setDateofEvaluation(ndf.format(trandate));
+            drdetails.setDateofBirth(ndf.format(trandates));
 
             ofsParam param = new ofsParam();
             param.setCredentials(credentials);
@@ -376,6 +405,13 @@ public class PrimeraInterface {
                 items.add(item);
 
                 item = new DataItem();
+                item.setItemHeader("MNEMONIC");
+                String mne = drdetails.getSurname();
+                String fmne = mne.substring(0, 4) + ".01";
+                item.setItemValues(new String[]{fmne});
+                items.add(item);
+
+                item = new DataItem();
                 item.setItemHeader("NAME.2");
                 item.setItemValues(new String[]{drdetails.getMiddleName()});
                 items.add(item);
@@ -388,6 +424,23 @@ public class PrimeraInterface {
                 item = new DataItem();
                 item.setItemHeader("MARITAL.STATUS");
                 item.setItemValues(new String[]{drdetails.getMaritalStatus()});
+                items.add(item);
+
+                item = new DataItem();
+                item.setItemHeader("STREET");
+                String str = drdetails.getHomeAddress();
+                String fstr = options.escape(str);
+                item.setItemValues(new String[]{fstr});
+                items.add(item);
+
+                item = new DataItem();
+                item.setItemHeader("SECTOR");
+                item.setItemValues(new String[]{drdetails.getSector()});
+                items.add(item);
+
+                item = new DataItem();
+                item.setItemHeader("LOAN.TYPE");
+                item.setItemValues(new String[]{drdetails.getLoanType()});
                 items.add(item);
 
                 item = new DataItem();
@@ -443,7 +496,7 @@ public class PrimeraInterface {
                 dresp = ResponseCodes.Security_violation;
                 drobjectresp.setResponseCode(dresp.getCode());
                 drobjectresp.setResponseText(dresp.getMessage());
-//                accountdetailresp.setTransactionDate(sdf.format(trandate));
+                drobjectresp.setTransactionDate(zzdf.format(today));
                 weblogger.error(drobjectresp);
                 return drobjectresp;
             }
@@ -455,15 +508,18 @@ public class PrimeraInterface {
             if (t24.IsSuccessful(result)) {
 
                 dresp = ResponseCodes.SUCCESS;
+                drobjectresp.setTransactionID(result.split("/")[0]);
                 drobjectresp.setResponseCode(dresp.getCode());
                 drobjectresp.setResponseText(dresp.getMessage());
+                drobjectresp.setTransactionDate(zzdf.format(today));
                 weblogger.info(drobjectresp);
-                //drobjectresp.setTransactionDate(sdf.format(trandate));
+
             } else {
                 dresp = ResponseCodes.Invalid_transaction;
-                //drobjectresp.setMessage(result.split("/")[3]);
+                drobjectresp.setMessage(result.split("/")[3]);
                 drobjectresp.setResponseCode(dresp.getCode());
                 drobjectresp.setResponseText(dresp.getMessage());
+                drobjectresp.setTransactionDate(zzdf.format(today));
                 //details(result.split("/")[3]);
                 weblogger.error(drobjectresp);
                 return drobjectresp;
@@ -492,30 +548,45 @@ public class PrimeraInterface {
 
             SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
             SimpleDateFormat ndf = new SimpleDateFormat("yyyyMMdd");
+            SimpleDateFormat zzdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
+            Date today = Calendar.getInstance().getTime();
             Date trandate = sdf.parse(mcdetails.getDateofBirth());
             Date transdate = sdf.parse(mcdetails.getCustomerOpeningDate());
+            Date transdates = sdf.parse(mcdetails.getBusinesStartDate());
+
             String[] ofsoptions = new String[]{"", "I", "PROCESS", "", "0"};
             String[] credentials = new String[]{Ofsuser, Ofspass};
             List<DataItem> items = new LinkedList<>();
+
             mcdetails.setDateofBirth(ndf.format(trandate));
             mcdetails.setCustomerOpeningDate(ndf.format(transdate));
+            mcdetails.setBusinesStartDate(ndf.format(transdates));
             ofsParam param = new ofsParam();
             param.setCredentials(credentials);
             param.setOperation("CUSTOMER");
-            param.setVersion("MICRO.CREDIT.1");
+            param.setVersion("MICRO.CREDIT.3");
             param.setOptions(ofsoptions);
             param.setTransaction_id("");
 
             if (hash.equals(requesthash) && (!intName.equals(""))) {
                 DataItem item = new DataItem();
-                item.setItemHeader("TITLE");
-                item.setItemValues(new String[]{mcdetails.getTitle()});
+                item.setItemHeader("SHORT.NAME");
+                item.setItemValues(new String[]{mcdetails.getSurname()});
                 items.add(item);
 
                 item = new DataItem();
-                item.setItemHeader("SHORT.NAME");
-                item.setItemValues(new String[]{mcdetails.getSurname()});
+                item.setItemHeader("MNEMONIC");
+                String mne = mcdetails.getSurname();
+                String fmne = mne + ".1";
+                item.setItemValues(new String[]{fmne});
+                items.add(item);
+
+                item = new DataItem();
+                item.setItemHeader("STREET");
+                String add = mcdetails.getStreet();
+                String fad = options.escape(add);
+                item.setItemValues(new String[]{fad});
                 items.add(item);
 
                 item = new DataItem();
@@ -529,13 +600,13 @@ public class PrimeraInterface {
                 items.add(item);
 
                 item = new DataItem();
-                item.setItemHeader("BIRTH.INCORP.DATE");
-                item.setItemValues(new String[]{mcdetails.getDateofBirth()});
+                item.setItemHeader("PO.BOX.NO");
+                item.setItemValues(new String[]{mcdetails.getPOBOXNo()});
                 items.add(item);
 
                 item = new DataItem();
-                item.setItemHeader("INITIALS");
-                item.setItemValues(new String[]{mcdetails.getInitials()});
+                item.setItemHeader("BIRTH.INCORP.DATE");
+                item.setItemValues(new String[]{mcdetails.getDateofBirth()});
                 items.add(item);
 
                 item = new DataItem();
@@ -548,21 +619,31 @@ public class PrimeraInterface {
                 item.setItemValues(new String[]{mcdetails.getIndustry()});
                 items.add(item);
 
-                item = new DataItem();
-                item.setItemHeader("L.ACC.OFFICER");
-                item.setItemValues(new String[]{mcdetails.getIntroducer()});
-                items.add(item);
-
+//                item = new DataItem();
+//                item.setItemHeader("L.ACC.OFFICER");
+//                item.setItemValues(new String[]{mcdetails.getIntroducer()});
+//                items.add(item);
                 item = new DataItem();
                 item.setItemHeader("REPAYMENT.TYPE");
                 item.setItemValues(new String[]{mcdetails.getRepaymentType()});
                 items.add(item);
-
                 item = new DataItem();
-                item.setItemHeader("MIS.CODE");
-                item.setItemValues(new String[]{mcdetails.getBranchMISCode()});
+                item.setItemHeader("SECTOR");
+                item.setItemValues(new String[]{mcdetails.getSector()});
+                items.add(item);
+                item = new DataItem();
+                item.setItemHeader("LOAN.TYPE");
+                item.setItemValues(new String[]{mcdetails.getLoanType()});
+                items.add(item);
+                item = new DataItem();
+                item.setItemHeader("BVN.NUMBER");
+                item.setItemValues(new String[]{mcdetails.getBVNNumber()});
                 items.add(item);
 
+//                item = new DataItem();
+//                item.setItemHeader("MIS.CODE");
+//                item.setItemValues(new String[]{mcdetails.getBranchMISCode()});
+//                items.add(item);
                 item = new DataItem();
                 item.setItemHeader("GUARANTOR.NAME");
                 item.setItemValues(new String[]{mcdetails.getGuarantorName()});
@@ -573,11 +654,10 @@ public class PrimeraInterface {
                 item.setItemValues(new String[]{mcdetails.getAccountOfficer()});
                 items.add(item);
 
-                item = new DataItem();
-                item.setItemHeader("YOUR.REFER");
-                item.setItemValues(new String[]{mcdetails.getPrimeraRefer()});
-                items.add(item);
-
+//                item = new DataItem();
+//                item.setItemHeader("YOUR.REFER");
+//                item.setItemValues(new String[]{mcdetails.getPrimeraRefer()});
+//                items.add(item);
                 item = new DataItem();
                 item.setItemHeader("REFER.NAME");
                 item.setItemValues(new String[]{mcdetails.getRefereeName()});
@@ -588,6 +668,11 @@ public class PrimeraInterface {
                 item.setItemValues(new String[]{mcdetails.getRefereePhoneNo()});
                 items.add(item);
 
+                item = new DataItem();
+                item.setItemHeader("BUSINESS.ST.DT");
+                item.setItemValues(new String[]{mcdetails.getBusinesStartDate()});
+                items.add(item);
+
                 param.setDataItems(items);
 
                 weblogger.info("The items are " + items);
@@ -596,7 +681,7 @@ public class PrimeraInterface {
                 dresp = ResponseCodes.Security_violation;
                 mcdetailresp.setResponseCode(dresp.getCode());
                 mcdetailresp.setResponseText(dresp.getMessage());
-//                accountdetailresp.setTransactionDate(sdf.format(trandate));
+                mcdetailresp.setTransactionDate(zzdf.format(today));
                 weblogger.error(mcdetailresp);
                 return mcdetailresp;
             }
@@ -607,16 +692,20 @@ public class PrimeraInterface {
 
             if (t24.IsSuccessful(result)) {
                 dresp = ResponseCodes.SUCCESS;
+                mcdetailresp.setTransactionID(result.split("/")[0]);
                 mcdetailresp.setResponseCode(dresp.getCode());
                 mcdetailresp.setResponseText(dresp.getMessage());
+                mcdetailresp.setTransactionDate(zzdf.format(today));
                 weblogger.info(mcdetailresp);
             } else {
                 dresp = ResponseCodes.Invalid_transaction;
+                mcdetailresp.setMessage(result.split("/")[3]);
                 mcdetailresp.setResponseCode(dresp.getCode());
                 mcdetailresp.setResponseText(dresp.getMessage());
+                mcdetailresp.setTransactionDate(zzdf.format(today));
                 weblogger.fatal(mcdetailresp);
                 return mcdetailresp;
-                //mcdetailresp.setMessage(result.split("/")[3]);
+
                 //details(result.split("/")[3]);
             }
 
@@ -645,9 +734,11 @@ public class PrimeraInterface {
             String hash = options.get_SHA_512_Hash(stringtohash, APIKey);
             SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
             SimpleDateFormat ndf = new SimpleDateFormat("yyyyMMdd");
+            SimpleDateFormat zzdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
             Date trandate = sdf.parse(indetails.getDateofBirth());
             Date transdate = sdf.parse(indetails.getCustomerOpeningDate());
+            Date today = Calendar.getInstance().getTime();
             String[] ofsoptions = new String[]{"", "I", "PROCESS", "", "0"};
             String[] credentials = new String[]{Ofsuser, Ofspass};
             List<DataItem> items = new LinkedList<>();
@@ -744,6 +835,13 @@ public class PrimeraInterface {
                 items.add(item);
 
                 item = new DataItem();
+                item.setItemHeader("STREET");
+                String fadd = indetails.getHomeaddress();
+                String add = options.escape(fadd);
+                item.setItemValues(new String[]{add});
+                items.add(item);
+
+                item = new DataItem();
                 item.setItemHeader("MIS.CODE");
                 item.setItemValues(new String[]{indetails.getBranchMISCode()});
                 items.add(item);
@@ -764,6 +862,16 @@ public class PrimeraInterface {
                 items.add(item);
 
                 item = new DataItem();
+                item.setItemHeader("MNEMONIC");
+                item.setItemValues(new String[]{indetails.getMnemonic()});
+                items.add(item);
+
+                item = new DataItem();
+                item.setItemHeader("SECTOR");
+                item.setItemValues(new String[]{indetails.getSector()});
+                items.add(item);
+
+                item = new DataItem();
                 item.setItemHeader("REFER.NAME");
                 item.setItemValues(new String[]{indetails.getRefereeName()});
                 items.add(item);
@@ -781,6 +889,7 @@ public class PrimeraInterface {
                 dresp = ResponseCodes.Security_violation;
                 indetailresp.setResponseCode(dresp.getCode());
                 indetailresp.setResponseText(dresp.getMessage());
+                indetailresp.setTransactionDate(zzdf.format(today));
                 weblogger.error(indetailresp);
                 return indetailresp;
             }
@@ -792,14 +901,18 @@ public class PrimeraInterface {
             if (t24.IsSuccessful(result)) {
 
                 dresp = ResponseCodes.SUCCESS;
+                indetailresp.setTransactionID(result.split("/")[0]);
                 indetailresp.setResponseCode(dresp.getCode());
                 indetailresp.setResponseText(dresp.getMessage());
+                indetailresp.setTransactionDate(zzdf.format(today));
                 weblogger.info(indetailresp);
             } else {
 
                 dresp = ResponseCodes.Invalid_transaction;
+                indetailresp.setMessage(result.split("/")[3]);
                 indetailresp.setResponseCode(dresp.getCode());
                 indetailresp.setResponseText(dresp.getMessage());
+                indetailresp.setTransactionDate(zzdf.format(today));
                 weblogger.fatal(indetailresp);
                 return indetailresp;
                 //indetailresp.setMessage(result.split("/")[3]);
@@ -830,21 +943,23 @@ public class PrimeraInterface {
             String hash = options.get_SHA_512_Hash(stringtohash, APIKey);
             SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
             SimpleDateFormat ndf = new SimpleDateFormat("yyyyMMdd");
+            SimpleDateFormat zzdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
+            Date today = Calendar.getInstance().getTime();
             Date trandate = sdf.parse(nindetails.getDateRegistered());
             Date transdate = sdf.parse(nindetails.getCustomerOpeningDate());
-            Date transsdate = sdf.parse(nindetails.getDateRegistered());
+            Date transsdate = sdf.parse(nindetails.getBusinessstartdate());
             String[] ofsoptions = new String[]{"", "I", "PROCESS", "", "0"};
             String[] credentials = new String[]{Ofsuser, Ofspass};
             List<DataItem> items = new LinkedList<>();
             nindetails.setDateRegistered(ndf.format(trandate));
             nindetails.setCustomerOpeningDate(ndf.format(transdate));
-            nindetails.setDateofSignature(ndf.format(transsdate));
+            nindetails.setBusinessstartdate(ndf.format(transsdate));
 
             ofsParam param = new ofsParam();
             param.setCredentials(credentials);
             param.setOperation("CUSTOMER");
-            param.setVersion("ICL.CUST.NON-INDIVIDUAL");
+            param.setVersion("ICL.CUST.NON-INDIVIDUAL.NEW2");
             param.setOptions(ofsoptions);
             param.setTransaction_id("");
 
@@ -856,8 +971,33 @@ public class PrimeraInterface {
                 items.add(item);
 
                 item = new DataItem();
+                item.setItemHeader("MNEMONIC");
+                String mne = nindetails.getNameofEntity();
+                String fmne = mne.substring(0, 3) + ".1";
+                item.setItemValues(new String[]{fmne});
+                items.add(item);
+
+                item = new DataItem();
+                item.setItemHeader("STREET");
+                String fadd = nindetails.getHomeaddress();
+                String add = options.escape(fadd);
+                item.setItemValues(new String[]{add});
+                items.add(item);
+
+                item = new DataItem();
+                item.setItemHeader("PROVINCE.STATE");
+                item.setItemValues(new String[]{nindetails.getState()});
+                items.add(item);
+
+                item = new DataItem();
+                item.setItemHeader("SUBURB.TOWN");
+                item.setItemValues(new String[]{nindetails.getTown()});
+                items.add(item);
+
+                item = new DataItem();
                 item.setItemHeader("NAME.1");
-                item.setItemValues(new String[]{nindetails.getAbbreviatedName()});
+                String abbname = nindetails.getNameofEntity();
+                item.setItemValues(new String[]{abbname});
                 items.add(item);
 
                 item = new DataItem();
@@ -880,31 +1020,28 @@ public class PrimeraInterface {
                 item.setItemValues(new String[]{nindetails.getIndustry()});
                 items.add(item);
 
-                item = new DataItem();
-                item.setItemHeader("CRDT.IND");
-                item.setItemValues(new String[]{nindetails.getCreditIndicator()});
-                items.add(item);
-
-                item = new DataItem();
-                item.setItemHeader("DATE.OF.SIG");
-                item.setItemValues(new String[]{nindetails.getDateofSignature()});
-                items.add(item);
-
-                item = new DataItem();
-                item.setItemHeader("LOANS.WOF");
-                item.setItemValues(new String[]{nindetails.getLoansWrittenOff()});
-                items.add(item);
-
+//                item = new DataItem();
+//                item.setItemHeader("CRDT.IND");
+//                item.setItemValues(new String[]{nindetails.getCreditIndicator()});
+//                items.add(item);
+//
+//                item = new DataItem();
+//                item.setItemHeader("DATE.OF.SIG");
+//                item.setItemValues(new String[]{nindetails.getDateofSignature()});
+//                items.add(item);
+//                item = new DataItem();
+//                item.setItemHeader("LOANS.WOF");
+//                item.setItemValues(new String[]{nindetails.getLoansWrittenOff()});
+//                items.add(item);
                 item = new DataItem();
                 item.setItemHeader("ACCOUNT.OFFICER");
                 item.setItemValues(new String[]{nindetails.getAccountOfficer()});
                 items.add(item);
 
-                item = new DataItem();
-                item.setItemHeader("YOUR.REFER");
-                item.setItemValues(new String[]{nindetails.getPrimeraRefer()});
-                items.add(item);
-
+//                item = new DataItem();
+//                item.setItemHeader("YOUR.REFER");
+//                item.setItemValues(new String[]{nindetails.getPrimeraRefer()});
+//                items.add(item);
                 item = new DataItem();
                 item.setItemHeader("REFER.NAME");
                 item.setItemValues(new String[]{nindetails.getRefereeName()});
@@ -913,6 +1050,31 @@ public class PrimeraInterface {
                 item = new DataItem();
                 item.setItemHeader("REFEREE.PHONE");
                 item.setItemValues(new String[]{nindetails.getRefereePhoneNo()});
+                items.add(item);
+
+                item = new DataItem();
+                item.setItemHeader("SECTOR");
+                item.setItemValues(new String[]{nindetails.getSector()});
+                items.add(item);
+
+                item = new DataItem();
+                item.setItemHeader("PO.BOX.NO");
+                item.setItemValues(new String[]{nindetails.getPOBoxNumber()});
+                items.add(item);
+
+                item = new DataItem();
+                item.setItemHeader("BUSINESS.ST.DT");
+                item.setItemValues(new String[]{nindetails.getBusinessstartdate()});
+                items.add(item);
+
+                item = new DataItem();
+                item.setItemHeader("LOAN.TYPE");
+                item.setItemValues(new String[]{nindetails.getLoanType()});
+                items.add(item);
+
+                item = new DataItem();
+                item.setItemHeader("BVN.NUMBER");
+                item.setItemValues(new String[]{nindetails.getBVNNumber()});
                 items.add(item);
 
                 param.setDataItems(items);
@@ -934,19 +1096,20 @@ public class PrimeraInterface {
             if (t24.IsSuccessful(result)) {
 
                 dresp = ResponseCodes.SUCCESS;
+                nindetailresp.setTransactionID(result.split("/")[0]);
                 nindetailresp.setResponseCode(dresp.getCode());
                 nindetailresp.setResponseText(dresp.getMessage());
-                nindetailresp.setTransactionDate(sdf.format(trandate));
+                nindetailresp.setTransactionDate(zzdf.format(today));
                 weblogger.info(nindetailresp);
             } else {
 
                 dresp = ResponseCodes.Invalid_transaction;
+                nindetailresp.setMessage(result.split("/")[3]);
                 nindetailresp.setResponseCode(dresp.getCode());
                 nindetailresp.setResponseText(dresp.getMessage());
-                nindetailresp.setTransactionDate(sdf.format(trandate));
+                nindetailresp.setTransactionDate(zzdf.format(today));
                 weblogger.fatal(nindetailresp);
                 return nindetailresp;
-                //nindetailresp.setMessage(result.split("/")[3]);
 
             }
 
@@ -959,13 +1122,14 @@ public class PrimeraInterface {
         return nindetailresp;
     }
 
-    @WebMethod(operationName = "AbjLoans")
-    public ObjectResponse AbjLoans(@WebParam(name = "loansdeposits") AbjLoansRequest loansdeposits) throws Exception {
+    @WebMethod(operationName = "PayrollLoan")
+    public ObjectResponse PayrollLoan(@WebParam(name = "loansdeposits") AbjLoansRequest loansdeposits) throws Exception {
         ObjectResponse loansdepositsresp = new ObjectResponse();
-        weblogger.info("AbjLoans");
+        weblogger.info("PayrollLoan");
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
             SimpleDateFormat ndf = new SimpleDateFormat("yyyyMMdd");
+            SimpleDateFormat zzdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
             String stringtohash = loansdeposits.getCustomer() + loansdeposits.getLoanApprovedDate();
 
@@ -976,8 +1140,9 @@ public class PrimeraInterface {
 
             Date trandate = sdf.parse(loansdeposits.getValueDate());
             Date transdate = sdf.parse(loansdeposits.getMaturityDate());
-            Date tramdate = sdf.parse (loansdeposits.getLoanApprovedDate());
-            
+            Date tramdate = sdf.parse(loansdeposits.getLoanApprovedDate());
+            Date today = Calendar.getInstance().getTime();
+
             String[] ofsoptions = new String[]{"", "I", "PROCESS", "", "0"};
             String[] credentials = new String[]{Ofsuser, Ofspass};
             List<DataItem> items = new LinkedList<>();
@@ -1060,7 +1225,7 @@ public class PrimeraInterface {
                 dresp = ResponseCodes.Security_violation;
                 loansdepositsresp.setResponseCode(dresp.getCode());
                 loansdepositsresp.setResponseText(dresp.getMessage());
-                loansdepositsresp.setTransactionDate(sdf.format(trandate));
+                loansdepositsresp.setTransactionDate(zzdf.format(today));
                 weblogger.error(loansdepositsresp);
                 return loansdepositsresp;
             }
@@ -1071,17 +1236,19 @@ public class PrimeraInterface {
 
             if (t24.IsSuccessful(result)) {
                 dresp = ResponseCodes.SUCCESS;
+                loansdepositsresp.setTransactionID(result.split("/")[0]);
                 loansdepositsresp.setResponseCode(dresp.getCode());
                 loansdepositsresp.setResponseText(dresp.getMessage());
-                loansdepositsresp.setTransactionDate(sdf.format(trandate));
+                loansdepositsresp.setTransactionDate(zzdf.format(today));
                 weblogger.info(loansdepositsresp);
 
             } else {
 
                 dresp = ResponseCodes.Invalid_transaction;
+                loansdepositsresp.setMessage(result.split("/")[3]);
                 loansdepositsresp.setResponseCode(dresp.getCode());
                 loansdepositsresp.setResponseText(dresp.getMessage());
-                loansdepositsresp.setTransactionDate(sdf.format(trandate));
+                loansdepositsresp.setTransactionDate(zzdf.format(today));
                 weblogger.fatal(loansdepositsresp);
                 return loansdepositsresp;
             }
@@ -1097,10 +1264,10 @@ public class PrimeraInterface {
 
     }
 
-    @WebMethod(operationName = "CashLoan")
-    public ObjectResponse CashLoan(@WebParam(name = "icldeposit") IclCashLoanRequest icldeposit) throws Exception {
+    @WebMethod(operationName = "FormalLoan")
+    public ObjectResponse FormalLoan(@WebParam(name = "icldeposit") IclCashLoanRequest icldeposit) throws Exception {
         ObjectResponse icldepositresp = new ObjectResponse();
-        weblogger.info("CashLoan");
+        weblogger.info("FormalLoan");
         try {
 
             String stringtohash = icldeposit.getCustomer() + icldeposit.getMaturityDate();
@@ -1108,41 +1275,90 @@ public class PrimeraInterface {
             String requesthash = icldeposit.getHash();
 
             String intName = icldeposit.getInterfaceName();
+            double intrate = icldeposit.getInterestRate();
+            int loanamount = icldeposit.getLoanAmount();
+
             String hash = options.get_SHA_512_Hash(stringtohash, APIKey);
             List<DataItem> items = new LinkedList<>();
+            List<DataItem> items2 = new LinkedList<>();
 
             SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
             SimpleDateFormat ndf = new SimpleDateFormat("yyyyMMdd");
+            SimpleDateFormat zzdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
             Date trandate = sdf.parse(icldeposit.getValueDate());
             Date transdate = sdf.parse(icldeposit.getMaturityDate());
-            String[] ofsoptions = new String[]{"", "I", "PROCESS", "", "0"};
+            Date repaydate = sdf.parse(icldeposit.getRepaymentStartDate());
+            Date today = Calendar.getInstance().getTime();
+            String[] ofsoptions = new String[]{"", "I", "PROCESS", "", "1"};
             String[] credentials = new String[]{Ofsuser, Ofspass};
 
             icldeposit.setValueDate(ndf.format(trandate));
             icldeposit.setMaturityDate(ndf.format(transdate));
+            icldeposit.setRepaymentStartDate(ndf.format(repaydate));
 
             ofsParam param = new ofsParam();
             param.setCredentials(credentials);
             param.setOperation("LD.LOANS.AND.DEPOSITS");
-            param.setVersion("ICL.CASH.LOAN");
+            param.setVersion("ICL.CASH.LOAN.4");
             param.setOptions(ofsoptions);
             param.setTransaction_id("");
 
             if (hash.equals(requesthash) && (!intName.equals(""))) {
                 DataItem item = new DataItem();
-                item.setItemHeader("LOAN.APPL.ID");
-                item.setItemValues(new String[]{icldeposit.getLoanApplicationID()});
-                items.add(item);
-
-                item = new DataItem();
                 item.setItemHeader("CUSTOMER.ID");
                 item.setItemValues(new String[]{icldeposit.getCustomer()});
                 items.add(item);
 
                 item = new DataItem();
+                item.setItemHeader("CATEGORY");
+                item.setItemValues(new String[]{icldeposit.getCategory()});
+                items.add(item);
+
+                item = new DataItem();
+                item.setItemHeader("BUS.DAY.DEFN");
+                item.setItemValues(new String[]{"NG"});
+                items.add(item);
+
+                item = new DataItem();
+                item.setItemHeader("PRIN.LIQ.ACCT");
+                item.setItemValues(new String[]{icldeposit.getDrawdownAccount()});
+                items.add(item);
+
+                item = new DataItem();
+                item.setItemHeader("INT.LIQ.ACCT");
+                item.setItemValues(new String[]{icldeposit.getDrawdownAccount()});
+                items.add(item);
+
+                item = new DataItem();
+                item.setItemHeader("INTEREST.RATE");
+                item.setItemValues(new String[]{"0"});
+                items.add(item);
+
+                item = new DataItem();
+                item.setItemHeader("FEE.PAY.ACCOUNT");
+                item.setItemValues(new String[]{icldeposit.getDrawdownAccount()});
+                items.add(item);
+
+                item = new DataItem();
+                item.setItemHeader("CHRG.LIQ.ACCT");
+                item.setItemValues(new String[]{icldeposit.getDrawdownAccount()});
+                items.add(item);
+
+                item = new DataItem();
                 item.setItemHeader("LOAN.PURPOSE");
                 item.setItemValues(new String[]{icldeposit.getLoanPurpose()});
+                items.add(item);
+
+                item = new DataItem();
+                item.setItemHeader("AMOUNT");
+                String amtstring = Integer.toString(loanamount);
+                item.setItemValues(new String[]{amtstring});
+                items.add(item);
+
+                item = new DataItem();
+                item.setItemHeader("CURRENCY");
+                item.setItemValues(new String[]{icldeposit.getCurrency()});
                 items.add(item);
 
                 item = new DataItem();
@@ -1161,18 +1377,61 @@ public class PrimeraInterface {
                 items.add(item);
 
                 item = new DataItem();
-                item.setItemHeader("L.ACC.OFFICER");
-                item.setItemValues(new String[]{icldeposit.getIntroducer()});
-                items.add(item);
-
-                item = new DataItem();
-                item.setItemHeader("PROVISION.METHOD");
-                item.setItemValues(new String[]{icldeposit.getProvisionMethod()});
+                item.setItemHeader("ORIG.DISB.AMT");
+                item.setItemValues(new String[]{amtstring});
                 items.add(item);
 
                 item = new DataItem();
                 item.setItemHeader("APPRVD.AMT");
-                item.setItemValues(new String[]{icldeposit.getLoanDisbursedAmount()});
+                String approvedamt = Integer.toString(loanamount);
+                item.setItemValues(new String[]{approvedamt});
+                items.add(item);
+
+                item = new DataItem();
+                item.setItemHeader("DRAWDOWN.ACCOUNT");
+                item.setItemValues(new String[]{icldeposit.getDrawdownAccount()});
+                items.add(item);
+
+                item = new DataItem();
+                item.setItemHeader("REPAY.PRIN.INT");
+                double totalrepayment = options.Repayment(loanamount, intrate);
+                String repayment = Double.toString(totalrepayment);
+                item.setItemValues(new String[]{repayment});
+                items.add(item);
+
+                item = new DataItem();
+                item.setItemHeader("INFO.SP.LOAN");
+                int tenure = options.monthsBetween(trandate, transdate);
+                double totalinstallment = options.TotalInstallments(loanamount, intrate);
+                String tenor = Integer.toString(tenure);
+                String installment = Double.toString(totalinstallment);
+                item.setItemValues(new String[]{tenor + " " + installment});
+                items.add(item);
+
+                item = new DataItem();
+                item.setItemHeader("INT.RATE");
+                String interestrate = Double.toString(intrate);
+                item.setItemValues(new String[]{interestrate});
+                items.add(item);
+
+                item = new DataItem();
+                item.setItemHeader("INTEREST.RATE");
+                item.setItemValues(new String[]{"0"});
+                items.add(item);
+
+                item = new DataItem();
+                item.setItemHeader("INTEREST.FREQ");
+                item.setItemValues(new String[]{"M"});
+                items.add(item);
+
+                item = new DataItem();
+                item.setItemHeader("INT.START.DT");
+                item.setItemValues(new String[]{icldeposit.getRepaymentStartDate()});
+                items.add(item);
+
+                item = new DataItem();
+                item.setItemHeader("LIQUIDATION.MODE");
+                item.setItemValues(new String[]{"SEMI-AUTOMATIC"});
                 items.add(item);
 
                 item = new DataItem();
@@ -1185,35 +1444,109 @@ public class PrimeraInterface {
                 item.setItemValues(new String[]{icldeposit.getRepaymentType()});
                 items.add(item);
 
-                param.setDataItems(items);
+                item = new DataItem();
+                item.setItemHeader("OUR.REMARKS");
+                item.setItemValues(new String[]{icldeposit.getComment()});
+                items.add(item);
 
-                weblogger.info("The items are " + items);
+                item = new DataItem();
+                item.setItemHeader("AUTO.SCHEDS");
+                item.setItemValues(new String[]{"NO"});
+                items.add(item);
+
+                item = new DataItem();
+                item.setItemHeader("DEFINE.SCHEDS");
+                item.setItemValues(new String[]{"YES"});
+                items.add(item);
+
+                param.setDataItems(items);
 
             } else {
                 dresp = ResponseCodes.Security_violation;
                 icldepositresp.setResponseCode(dresp.getCode());
                 icldepositresp.setResponseText(dresp.getMessage());
-                icldepositresp.setTransactionDate(sdf.format(trandate));
+                icldepositresp.setTransactionDate(zzdf.format(today));
                 weblogger.error(icldepositresp);
                 return icldepositresp;
             }
 
             String ofstring = t24.generateOFSTransactString(param);
 
-            String result = t24.PostMsg(ofstring);
+            DataItem item2 = new DataItem();
+            item2.setItemHeader("FORWARD.BACKWARD");
+            item2.setItemValues(new String[]{"3"});
+            items2.add(item2);
+
+            item2 = new DataItem();
+            item2.setItemHeader("BASE.DATE.KEY");
+            item2.setItemValues(new String[]{"1"});
+            items2.add(item2);
+
+//            item2 = new DataItem();
+//            item2.setItemHeader("BASE.DATE.KEY");
+//            item2.setItemValues(new String[]{"1"});
+//            items2.add(item2);
+//
+//            item2 = new DataItem();
+//            item2.setItemHeader("SCH.TYPE");
+//            item2.setItemValues(new String[]{"P", "F"});
+//            items2.add(item2);
+//
+//            item2 = new DataItem();
+//            item2.setItemHeader("CURRENCY");
+//            item2.setItemValues(new String[]{"NGN", "NGN"});
+//            items2.add(item2);
+//
+//            item2 = new DataItem();
+//            item2.setItemHeader("DATE");
+//            item2.setItemValues(new String[]{icldeposit.getRepaymentStartDate(), icldeposit.getRepaymentStartDate()});
+//            items2.add(item2);
+//
+//            int tenure = options.monthsBetween(trandate, transdate);
+//            double amount1 = options.Amount1(loanamount, tenure);
+//            double amount2 = options.Amount2(intrate, tenure, loanamount);
+//            String stramt1 = Double.toString(amount1);
+//            String stramt2 = Double.toString(amount2);
+//            item2 = new DataItem();
+//            item2.setItemHeader("AMOUNT");
+//            item2.setItemValues(new String[]{stramt1, stramt2});
+//            items2.add(item2);
+//
+//            item2 = new DataItem();
+//            item2.setItemHeader("FREQUENCY");
+//            item2.setItemValues(new String[]{"M", "M"});
+//            items2.add(item2);
+//
+//            item2 = new DataItem();
+//            item2.setItemHeader("CHARGE.CODE");
+//            item2.setItemValues(new String[]{"", "99"});
+//            items2.add(item2);
+            weblogger.info("The items are " + items + items2);
+
+            param.setDataItems(items2);
+
+            String loanofstring = t24.generateLoanOFSTransactString(param);
+//
+            String finalstring = ofstring + "//" + loanofstring;
+
+            String result = t24.PostMsg(finalstring);
+
+            String LoanID = (result.split("/")[0]);
 
             if (t24.IsSuccessful(result)) {
                 dresp = ResponseCodes.SUCCESS;
+                icldepositresp.setTransactionID(result.split("/")[0]);
                 icldepositresp.setResponseCode(dresp.getCode());
                 icldepositresp.setResponseText(dresp.getMessage());
-                icldepositresp.setTransactionDate(sdf.format(trandate));
+                icldepositresp.setTransactionDate(zzdf.format(today));
                 weblogger.info(icldepositresp);
             } else {
 
                 dresp = ResponseCodes.Invalid_transaction;
+                icldepositresp.setMessage(result.split("/")[3]);
                 icldepositresp.setResponseCode(dresp.getCode());
                 icldepositresp.setResponseText(dresp.getMessage());
-                icldepositresp.setTransactionDate(sdf.format(trandate));
+                icldepositresp.setTransactionDate(zzdf.format(today));
                 weblogger.fatal(icldepositresp);
                 return icldepositresp;
 
@@ -1230,6 +1563,25 @@ public class PrimeraInterface {
 
     }
 
+    @WebMethod(operationName = "AuthorizeLoan")
+    public String AuthorizeLoan(@WebParam(name = "ID") String pubdeposit) throws Exception {
+        String[] ofsoptions = new String[]{"", "A",};
+        String[] credentials = new String[]{Authuser, Authpass};
+
+        ofsParam param = new ofsParam();
+        param.setCredentials(credentials);
+        param.setOperation("LD.LOANS.AND.DEPOSITS");
+        param.setVersion("ICL.CASH.LOAN.4");
+        param.setOptions(ofsoptions);
+        String LoanID = "LD1911338065";
+        param.setTransaction_id(LoanID);
+
+        String loanofstring = t24.generateAuthTransactString(param);
+        String result = t24.PostMsg(loanofstring);
+
+        return "";
+    }
+
     @WebMethod(operationName = "PublicFederalLoan")
     public ObjectResponse PublicFederalLoan(@WebParam(name = "pubdeposit") IclPublicFederalRequest pubdeposit) throws Exception {
         ObjectResponse pubdepositresp = new ObjectResponse();
@@ -1243,15 +1595,18 @@ public class PrimeraInterface {
             String intName = pubdeposit.getInterfaceName();
             String hash = options.get_SHA_512_Hash(stringtohash, APIKey);
             List<DataItem> items = new LinkedList<>();
+            List<DataItem> items2 = new LinkedList<>();
             SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
             SimpleDateFormat ndf = new SimpleDateFormat("yyyyMMdd");
+            SimpleDateFormat zzdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
+            Date today = Calendar.getInstance().getTime();
             Date trandate = sdf.parse(pubdeposit.getValueDate());
             Date transdate = sdf.parse(pubdeposit.getMaturityDate());
             Date tranndate = sdf.parse(pubdeposit.getRepaymentStartDate());
             Date tramdate = sdf.parse(pubdeposit.getLoanApprovedDate());
 
-            String[] ofsoptions = new String[]{"", "I", "PROCESS", "", "0"};
+            String[] ofsoptions = new String[]{"", "I", "PROCESS", "", "1"};
             String[] credentials = new String[]{Ofsuser, Ofspass};
 
             pubdeposit.setValueDate(ndf.format(trandate));
@@ -1355,7 +1710,7 @@ public class PrimeraInterface {
                 dresp = ResponseCodes.Security_violation;
                 pubdepositresp.setResponseCode(dresp.getCode());
                 pubdepositresp.setResponseText(dresp.getMessage());
-                pubdepositresp.setTransactionDate(sdf.format(trandate));
+                pubdepositresp.setTransactionDate(zzdf.format(today));
                 weblogger.error(pubdepositresp);
                 return pubdepositresp;
 
@@ -1367,16 +1722,18 @@ public class PrimeraInterface {
 
             if (t24.IsSuccessful(result)) {
                 dresp = ResponseCodes.SUCCESS;
+                pubdepositresp.setTransactionID(result.split("/")[0]);
                 pubdepositresp.setResponseCode(dresp.getCode());
                 pubdepositresp.setResponseText(dresp.getMessage());
-                pubdepositresp.setTransactionDate(sdf.format(trandate));
+                pubdepositresp.setTransactionDate(zzdf.format(today));
                 weblogger.info(pubdepositresp);
 
             } else {
                 dresp = ResponseCodes.Invalid_transaction;
+                pubdepositresp.setMessage(result.split("/")[3]);
                 pubdepositresp.setResponseCode(dresp.getCode());
                 pubdepositresp.setResponseText(dresp.getMessage());
-                pubdepositresp.setTransactionDate(sdf.format(trandate));
+                pubdepositresp.setTransactionDate(zzdf.format(today));
                 weblogger.fatal(pubdepositresp);
                 return pubdepositresp;
             }
@@ -1406,7 +1763,9 @@ public class PrimeraInterface {
             String hash = options.get_SHA_512_Hash(stringtohash, APIKey);
             SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
             SimpleDateFormat ndf = new SimpleDateFormat("yyyyMMdd");
+            SimpleDateFormat zzdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
+            Date today = Calendar.getInstance().getTime();
             Date trandate = sdf.parse(statedeposit.getValueDate());
             Date transdate = sdf.parse(statedeposit.getMaturityDate());
             Date tranndate = sdf.parse(statedeposit.getRepaymentStartDate());
@@ -1415,6 +1774,7 @@ public class PrimeraInterface {
             String[] ofsoptions = new String[]{"", "I", "PROCESS", "", "0"};
             String[] credentials = new String[]{Ofsuser, Ofspass};
             List<DataItem> items = new LinkedList<>();
+            List<DataItem> items2 = new LinkedList<>();
 
             statedeposit.setValueDate(ndf.format(trandate));
             statedeposit.setMaturityDate(ndf.format(transdate));
@@ -1516,7 +1876,7 @@ public class PrimeraInterface {
                 dresp = ResponseCodes.Security_violation;
                 statedepositresp.setResponseCode(dresp.getCode());
                 statedepositresp.setResponseText(dresp.getMessage());
-                statedepositresp.setTransactionDate(sdf.format(trandate));
+                statedepositresp.setTransactionDate(zzdf.format(today));
                 weblogger.error(statedepositresp);
                 return statedepositresp;
             }
@@ -1528,16 +1888,18 @@ public class PrimeraInterface {
             if (t24.IsSuccessful(result)) {
 
                 dresp = ResponseCodes.SUCCESS;
+                statedepositresp.setTransactionID(result.split("/")[0]);
                 statedepositresp.setResponseCode(dresp.getCode());
                 statedepositresp.setResponseText(dresp.getMessage());
-                statedepositresp.setTransactionDate(sdf.format(trandate));
+                statedepositresp.setTransactionDate(zzdf.format(today));
                 weblogger.info(statedepositresp);
 
             } else {
                 dresp = ResponseCodes.Invalid_transaction;
+                statedepositresp.setMessage(result.split("/")[3]);
                 statedepositresp.setResponseCode(dresp.getCode());
                 statedepositresp.setResponseText(dresp.getMessage());
-                statedepositresp.setTransactionDate(sdf.format(trandate));
+                statedepositresp.setTransactionDate(zzdf.format(today));
                 weblogger.fatal(statedepositresp);
                 return statedepositresp;
             }
@@ -1553,14 +1915,14 @@ public class PrimeraInterface {
 
     }
 
-    @WebMethod(operationName = "ChequeCollection")
-    public ObjectResponse ChequeCollection(@WebParam(name = "chequecollect") ChequeCollectionRequest chequecollect) throws Exception {
+    @WebMethod(operationName = "ChequeManagement")
+    public ObjectResponse ChequeManagement(@WebParam(name = "chequecollect") ChequeCollectionRequest chequecollect) throws Exception {
         ObjectResponse chequecollectresp = new ObjectResponse();
-        weblogger.info("ChequeCollection");
+        weblogger.info("ChequeManagement");
 
         try {
 
-            String stringtohash = chequecollect.getChequeAcctNo() + chequecollect.getCustomerName();
+            String stringtohash = chequecollect.getCustomerLoanNo() + chequecollect.getCustomerCIF();
 
             String requesthash = chequecollect.getHash();
 
@@ -1568,9 +1930,11 @@ public class PrimeraInterface {
             String hash = options.get_SHA_512_Hash(stringtohash, APIKey);
             SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
             SimpleDateFormat ndf = new SimpleDateFormat("yyyyMMdd");
+            SimpleDateFormat zzdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
             Date trandate = sdf.parse(chequecollect.getDateChequePresented());
             Date transdate = sdf.parse(chequecollect.getDateCollected());
+            Date today = Calendar.getInstance().getTime();
 
             String[] ofsoptions = new String[]{"", "I", "PROCESS", "", "0"};
             String[] credentials = new String[]{Ofsuser, Ofspass};
@@ -1582,7 +1946,7 @@ public class PrimeraInterface {
             ofsParam param = new ofsParam();
             param.setCredentials(credentials);
             param.setOperation("ICL.CHEQUE.COLLECTN.RECOVERY");
-            param.setVersion("MAIN");
+            param.setVersion("MAIN2");
             param.setOptions(ofsoptions);
             param.setTransaction_id("");
 
@@ -1595,6 +1959,11 @@ public class PrimeraInterface {
                 item = new DataItem();
                 item.setItemHeader("T24.ACCT.NO");
                 item.setItemValues(new String[]{chequecollect.getT24AcctNo()});
+                items.add(item);
+
+                item = new DataItem();
+                item.setItemHeader("CUSTOMER.NO");
+                item.setItemValues(new String[]{chequecollect.getCustomerCIF()});
                 items.add(item);
 
                 item = new DataItem();
@@ -1623,6 +1992,11 @@ public class PrimeraInterface {
                 items.add(item);
 
                 item = new DataItem();
+                item.setItemHeader("ACCOUNT.OFFICER");
+                item.setItemValues(new String[]{chequecollect.getAccountOfficer()});
+                items.add(item);
+
+                item = new DataItem();
                 item.setItemHeader("REPRESENTED.DD");
                 item.setItemValues(new String[]{chequecollect.getDateChequePresented()});
                 items.add(item);
@@ -1646,7 +2020,7 @@ public class PrimeraInterface {
                 dresp = ResponseCodes.Security_violation;
                 chequecollectresp.setResponseCode(dresp.getCode());
                 chequecollectresp.setResponseText(dresp.getMessage());
-                chequecollectresp.setTransactionDate(sdf.format(trandate));
+                chequecollectresp.setTransactionDate(zzdf.format(today));
                 weblogger.error(chequecollectresp);
                 return chequecollectresp;
             }
@@ -1658,16 +2032,18 @@ public class PrimeraInterface {
             if (t24.IsSuccessful(result)) {
 
                 dresp = ResponseCodes.SUCCESS;
+                chequecollectresp.setTransactionID(result.split("/")[0]);
                 chequecollectresp.setResponseCode(dresp.getCode());
                 chequecollectresp.setResponseText(dresp.getMessage());
-                chequecollectresp.setTransactionDate(sdf.format(trandate));
+                chequecollectresp.setTransactionDate(zzdf.format(today));
                 weblogger.info(chequecollectresp);
 
             } else {
                 dresp = ResponseCodes.Invalid_transaction;
+                chequecollectresp.setMessage(result.split("/")[3]);
                 chequecollectresp.setResponseCode(dresp.getCode());
                 chequecollectresp.setResponseText(dresp.getMessage());
-                chequecollectresp.setTransactionDate(sdf.format(trandate));
+                chequecollectresp.setTransactionDate(zzdf.format(today));
                 weblogger.fatal(chequecollectresp);
                 return chequecollectresp;
             }

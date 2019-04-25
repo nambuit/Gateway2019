@@ -18,11 +18,22 @@ public class IclCashLoanRequest {
 
     private String LoanApplicationID;
     private String Customer;
+    private String Category;
+    private String Currency;
     private String LoanPurpose;
+    private int LoanAmount;
+    private String RepaymentFrequency;
+    private String RepaymentStartDate;
+    private String LoanApprovedDate;
+    private String DrawdownAccount;
+    private String AutoSchedule;
+    private String DefineSchedule;
+    private String LiquidationMode;
+    private double InterestRate;
     private String ValueDate;
     private String MaturityDate;
     private String ProvisionMethod;
-    private String Introducer;
+    private String Comment;
     private String LoanDisbursedAmount;
     private String LoanType;
     private String RepaymentType;

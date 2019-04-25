@@ -23,6 +23,15 @@ public class NonIndividualCustomerRequest {
     //private String EntityType;
     private String Industry;
     private String Sector;
+    private String mnemonic;
+    private String homeaddress;
+    private String state;
+    private String town;
+    private String POBoxNumber;
+    private String businessstartdate;
+    private String BVNNumber;
+    private String LoanType;
+    
     //private String CreditCheckDone;
     private String CreditIndicator;
     //private String ConsenttoDisclosure;

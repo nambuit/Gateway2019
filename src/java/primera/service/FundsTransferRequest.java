@@ -16,6 +16,7 @@ import lombok.Setter;
 public class FundsTransferRequest {
     
     private String DebitCustomer;
+    private String Currency;
     private String AccountBalance;
     private String SignInstructions;
     private String DebitAccountNo;

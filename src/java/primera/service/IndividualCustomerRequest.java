@@ -19,6 +19,7 @@ public class IndividualCustomerRequest {
     private String MiddleName;
     private String FirstName;
     private String MaritalStatus;
+    private String homeaddress;
     private String MaidenName;
     private String DateofBirth;
     private String Initials;

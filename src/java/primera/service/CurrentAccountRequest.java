@@ -14,10 +14,14 @@ import lombok.Setter;
  */
 
 @Getter @Setter
+
 public class CurrentAccountRequest {
  
     
     private String CustomerNo;
+     private String currency;
+     private String category;
+     
     //private String Category;
     //private String Currency;
     private String AccountName;
@@ -32,11 +36,6 @@ public class CurrentAccountRequest {
     private String BranchLocation;
     private String hash;
     private String InterfaceName;
-   
-    
-    
-    
-    
     
     
             

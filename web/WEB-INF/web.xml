@@ -1,36 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
-	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
-	 version="3.1">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+         version="3.1">
     <session-config>
         <session-timeout>
             30
         </session-timeout>
     </session-config>
-      <env-entry>
+    <env-entry>
         <env-entry-name>HOST</env-entry-name>
         <env-entry-type>java.lang.String</env-entry-type>
-        <env-entry-value>localhost</env-entry-value>
+        <env-entry-value>172.16.16.17</env-entry-value>
     </env-entry>
     <env-entry>
         <env-entry-name>PORT</env-entry-name>
         <env-entry-type>java.lang.String</env-entry-type>
         <env-entry-value>20009</env-entry-value>
     </env-entry>
-      <env-entry>
+    <env-entry>
         <env-entry-name>OFSsource</env-entry-name>
         <env-entry-type>java.lang.String</env-entry-type>
-        <env-entry-value>BankOne</env-entry-value>
-      </env-entry>   
-         <env-entry>
+        <env-entry-value>PRIMERAINT</env-entry-value>
+    </env-entry>   
+    <env-entry>
         <env-entry-name>OFSuser</env-entry-name>
         <env-entry-type>java.lang.String</env-entry-type>
-        <env-entry-value>AUTHOR</env-entry-value>
+        <env-entry-value>COBUSER</env-entry-value>
     </env-entry>
-        <env-entry>
+    <env-entry>
+        <env-entry-name>AUTHuser</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>INLAKSUSER</env-entry-value>
+    </env-entry>
+    <env-entry>
         <env-entry-name>OFSpass</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>7654321@Pcl</env-entry-value>
+    </env-entry> 
+    <env-entry>
+        <env-entry-name>AUTHpass</env-entry-name>
         <env-entry-type>java.lang.String</env-entry-type>
         <env-entry-value>123456</env-entry-value>
     </env-entry>         
@@ -39,7 +49,7 @@
         <env-entry-type>java.lang.String</env-entry-type>
         <env-entry-value>E:\NambuitChannelsLogs</env-entry-value>
     </env-entry> 
-      <env-entry>
+    <env-entry>
         <env-entry-name>ImageBase</env-entry-name>
         <env-entry-type>java.lang.String</env-entry-type>
         <env-entry-value>C:\Temenos\Modelbank-R13\3rdParty\jboss\server\default\deploy\BrowserWeb.war</env-entry-value>

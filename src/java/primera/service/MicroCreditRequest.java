@@ -21,6 +21,7 @@ public class MicroCreditRequest {
     private String DateofBirth;
     private String Initials;
     private String CustomerOpeningDate;
+    private String BusinesStartDate;
     private String Industry;
     private String Introducer;
     private String RepaymentType;
@@ -30,8 +31,18 @@ public class MicroCreditRequest {
     private String PrimeraRefer;
     private String RefereeName;
     private String RefereePhoneNo;
+    private String POBOXNo;
+    private String LoanType;
+    private String BVNNumber;
     private String hash;
     private String InterfaceName;
+    private String EntityType;
+    private String Street;
+    private String Sector;
+    private String CustomerLanguage;
+    private String Nationality;
+    private String Residence;
+    private String Mnemonic;
     //private String EntityType;
     
 }

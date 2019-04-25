@@ -36,7 +36,8 @@ public class ObjectResponse {
         builder.append("ResponseCode:" + ResponseCode + " ");
         builder.append("ResponseText:"  + ResponseText + " ");
         builder.append("TransactionDate:"  + TransactionDate + " ");
-        
+        builder.append("TransactionID:"  + TransactionID + " ");
+        builder.append("Message:"  + Message + " ");
         return builder.toString();
         
     

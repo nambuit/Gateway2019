@@ -23,9 +23,11 @@ public class IclPublicFederalRequest {
     private String PrincipalAmount;
     private String LoanPurpose;
     private String ValueDate;
+    private String Category;
     private String MaturityDate;
     private String AccountOfficer;
     private String LoanDisbursedAmount;
+    private String DrawdownAccount;
     private String ProvisionMethod;
     private String RepaymentType;
     private String MeansOfPayment;

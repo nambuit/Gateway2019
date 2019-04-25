@@ -21,7 +21,7 @@ public class ChequeCollectionRequest {
     private String T24AcctNo;
     private String CustomerCIF;
     private String CustomerName;
-    private String SalesOfficer;
+    private String AccountOfficer;
     private String CustomerBankBranch;
     private String ChequeSerialNumber;
     //private String ChequeStatus;
