@@ -29,5 +29,8 @@ public class IclChequeRequest {
     private String CustomerAccount;
     private String DataCollected;
     private String Comment;
+    private String apikey;
+    private String applicationID;
+    private String authenticationID;
 
 }

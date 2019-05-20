@@ -43,6 +43,9 @@ public class MicroCreditRequest {
     private String Nationality;
     private String Residence;
     private String Mnemonic;
+    private String apikey;
+    private String applicationID;
+    private String authenticationID;
     //private String EntityType;
     
 }

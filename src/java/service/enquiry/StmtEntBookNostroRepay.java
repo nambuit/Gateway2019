@@ -19,6 +19,9 @@ public class StmtEntBookNostroRepay
     private String AccountNo;
     private String StartDate;
     private String Enddate;
-    
+    private String apikey;
+    private String authenticationID;
+    private String applicationID;
+    private String hash;
     
 }

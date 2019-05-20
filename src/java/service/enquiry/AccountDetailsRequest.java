@@ -16,6 +16,9 @@ import lombok.Setter;
 @Setter
 public class AccountDetailsRequest {
 
-    private String AccountNo;
+    private String accountNumber;
     private String hash;
+    private String apikey;
+    private String applicationID;
+    private String authenticationID;
 }

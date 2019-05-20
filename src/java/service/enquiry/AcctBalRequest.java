@@ -18,5 +18,8 @@ public class AcctBalRequest {
 
     private String hash;
     private String AccountNo;
+    private String apikey;
+    private String applicationID;
+    private String authenticationID;
 
 }

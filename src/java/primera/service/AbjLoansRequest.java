@@ -30,5 +30,8 @@ public class AbjLoansRequest {
     private String RepaymentType;
     private String Hash;
     private String InterfaceName;
+    private String apikey;
+    private String authenticationID;
+    private String applicationID;
 
 }

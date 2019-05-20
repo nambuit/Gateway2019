@@ -35,5 +35,8 @@ public class IclPublicFederalRequest {
     private String Introducer;
     private String AmountApproved;
     private String hash;
+    private String applicationID;
+    private String authenticationID;
+    private String apikey;
     private String InterfaceName;
 }

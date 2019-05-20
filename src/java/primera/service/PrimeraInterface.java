@@ -6,20 +6,25 @@
 package primera.service;
 
 //import com.common.service.util.logging.LogService;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.sql.Connection;
+import java.sql.ResultSet;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-//import java.util.logging.Level;
-//import java.util.logging.Logger;
 import javax.jws.WebService;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.naming.InitialContext;
+import javax.ws.rs.HeaderParam;
 import prm.tools.AppParams;
 import org.apache.log4j.Logger;
+import static prm.tools.AppParams.isNullOrEmpty;
+import prm.tools.BCrypt;
+import prm.tools.DBConnector;
 import prm.tools.ResponseCodes;
 
 /**
@@ -37,13 +42,14 @@ public class PrimeraInterface {
     private String Authuser;
     private String Authpass;
     AppParams options;
+    private DBConnector db;
+    Connection conn = null;
     String logfilename = "PrimeraInterface";
     ResponseCodes dresp;
-//    String SFactor = "Transaction Successful";
-//    String DEBUG_KEY_METHOD_ENTRY = "METHOD_ENTRY";
-//    String DEBUG_KEY_METHOD_EXIT = "METHOD_EXIT";
-//    String DEBUG_KEY_EXP = "DEBUG_KEY";
-    public String APIKey = "4466FA2C-1886-4366-B014-AD140712BE38";
+    String apikey = "";
+    BCrypt B;
+    StringWriter writer;
+    PrintWriter printWriter;
 
     public PrimeraInterface() {
         try {
@@ -58,6 +64,9 @@ public class PrimeraInterface {
             Authpass = (String) ctx.lookup("AUTHpass");
             t24 = new T24Link(Host, port, OFSsource);
             options = new AppParams();
+            writer = new StringWriter();
+            printWriter = new PrintWriter(writer);
+            db = new DBConnector(options.getDBserver(), options.getDBuser(), options.getDBpass(), "PrimeraWeb");
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -65,53 +74,92 @@ public class PrimeraInterface {
     }
 
     @WebMethod(operationName = "LoanAccount")
-    public ObjectResponse LoanAccount(@WebParam(name = "accountdetails") CurrentAccountRequest accountdetails) throws Exception {
+    public ObjectResponse LoanAccount(@WebParam(name = "accountdetails") LoanAccountRequest accountdetails) throws Exception {
         ObjectResponse accountdetailresp = new ObjectResponse();
+        SimpleDateFormat zzdf;
+        zzdf = new SimpleDateFormat("dd MMM yyyy hh:mm:ss");
+        Date today = new Date();
         weblogger.info("LoanAccount");
 
         try {
+            String appID = accountdetails.getApplicationID();
 
-            String stringtohash = accountdetails.getAccountName() + accountdetails.getCustomerNo();
+            String AUTHID = accountdetails.getAuthenticationID();
 
+            String APIKEY = accountdetails.getApikey();
+
+            if (isNullOrEmpty(AUTHID) == true || isNullOrEmpty(APIKEY) == true || isNullOrEmpty(appID) == true) {
+
+                dresp = ResponseCodes.Credentials_missing_or_null;
+                accountdetailresp.setResponseCode(dresp.getCode());
+                accountdetailresp.setResponseText(dresp.getMessage());
+                accountdetailresp.setTransactionDate(zzdf.format(today));
+                return accountdetailresp;
+            }
+
+            ResultSet rs = db.getData("select * from PrimeraClients where ApplicationID = '" + appID.trim() + "';", conn);
+            if (rs.next()) {
+                apikey = rs.getString("APIKey");
+                String generatedapikey = options.get_SHA_512_Hash(APIKEY, APIKEY);
+                if (!apikey.trim().equals(generatedapikey.trim())) {
+                    dresp = ResponseCodes.Credentials_Encryption_Error;
+                    accountdetailresp.setResponseCode(dresp.getCode());
+                    accountdetailresp.setResponseText(dresp.getMessage());
+                    accountdetailresp.setTransactionDate(zzdf.format(today));
+                    weblogger.error(accountdetailresp);
+                    return accountdetailresp;
+                }
+                String authid = rs.getString("AuthenticationID");
+                String generatedauthID = options.get_SHA_512_Hash(AUTHID, AUTHID);
+                if (!authid.trim().equals(generatedauthID.trim())) {
+                    dresp = ResponseCodes.Credentials_Encryption_Error;
+                    accountdetailresp.setResponseCode(dresp.getCode());
+                    accountdetailresp.setResponseText(dresp.getMessage());
+                    accountdetailresp.setTransactionDate(zzdf.format(today));
+                    weblogger.error(accountdetailresp);
+                    return accountdetailresp;
+                }
+            } else {
+                dresp = ResponseCodes.Invalid_Sender;
+                accountdetailresp.setResponseCode(dresp.getCode());
+                accountdetailresp.setResponseText(dresp.getMessage());
+                accountdetailresp.setTransactionDate(zzdf.format(today));
+                weblogger.error(accountdetailresp);
+                return accountdetailresp;
+            }
+            String stringtohash = accountdetails.getCustomerNo() + APIKEY;
+            //String hash = options.generateBCrypthash(stringtohash);
             String requesthash = accountdetails.getHash();
-
-            String hash = options.get_SHA_512_Hash(stringtohash, APIKey);
-
-            String intName = accountdetails.getInterfaceName();
-
             SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
             SimpleDateFormat ndf = new SimpleDateFormat("yyyyMMdd");
-            SimpleDateFormat zzdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-
-            Date trandate = sdf.parse(accountdetails.getValueDate());
+//            Date trandate = sdf.parse(accountdetails.getValueDate());
             Date transdate = sdf.parse(accountdetails.getOpeningDate());
-            Date today = Calendar.getInstance().getTime();
-
+            String cusno = accountdetails.getCustomerNo();
             String[] ofsoptions = new String[]{"", "I", "PROCESS", "", "0"};
             String[] credentials = new String[]{Ofsuser, Ofspass};
             List<DataItem> items = new LinkedList<>();
 
-            //List<String> headers = result.get(0);0
-            accountdetails.setValueDate(ndf.format(trandate));
+            //List<String> headers = result.get(0)
+//            accountdetails.setValueDate(ndf.format(trandate));
             accountdetails.setOpeningDate(ndf.format(transdate));
 
             ofsParam param = new ofsParam();
-            param = new ofsParam();
             param.setCredentials(credentials);
             param.setOperation("ACCOUNT");
-            param.setVersion("ICL.CURR.ACCT");
+            param.setVersion("ICL.CURR.ACCT.4");
             param.setOptions(ofsoptions);
-            param.setTransaction_id("");
-            if (hash.equals(requesthash) && (!intName.equals(""))) {
+            param.setTransaction_id(cusno);
 
+            boolean matched = BCrypt.checkpw(stringtohash, requesthash);
+            if (matched == true) {
                 DataItem item = new DataItem();
                 item.setItemHeader("CUSTOMER");
                 item.setItemValues(new String[]{accountdetails.getCustomerNo()});
                 items.add(item);
 
                 item = new DataItem();
-                item.setItemHeader("ACCOUNT.TITLE.1");
-                item.setItemValues(new String[]{accountdetails.getAccountName()});
+                item.setItemHeader("MNEMONIC");
+                item.setItemValues(new String[]{accountdetails.getAccountMnemonic()});
                 items.add(item);
 
                 item = new DataItem();
@@ -129,44 +177,39 @@ public class PrimeraInterface {
                 item.setItemValues(new String[]{accountdetails.getBusinessSegmentCode()});
                 items.add(item);
 
-                item = new DataItem();
-                item.setItemHeader("LIMIT.REF");
-                item.setItemValues(new String[]{accountdetails.getLimitReference()});
-                items.add(item);
-
-                item = new DataItem();
-                item.setItemHeader("POSTING.RESTRICT");
-                item.setItemValues(new String[]{accountdetails.getBlockedReasons()});
-                items.add(item);
-
+//                item = new DataItem();
+//                item.setItemHeader("LIMIT.REF");
+//                item.setItemValues(new String[]{accountdetails.getLimitReference()});
+//                items.add(item);
+//                item = new DataItem();
+//                item.setItemHeader("POSTING.RESTRICT");
+//                item.setItemValues(new String[]{accountdetails.getBlockedReasons()});
+//                items.add(item);
                 item = new DataItem();
                 item.setItemHeader("OPENING.DATE");
                 item.setItemValues(new String[]{accountdetails.getOpeningDate()});
                 items.add(item);
 
-                item = new DataItem();
-                item.setItemHeader("VALUE.DATE");
-                item.setItemValues(new String[]{accountdetails.getValueDate()});
-                items.add(item);
-
-                item = new DataItem();
-                item.setItemHeader("ENT.DETAILS");
-                item.setItemValues(new String[]{accountdetails.getIPPISnumber()});
-                items.add(item);
-
-                item = new DataItem();
-                item.setItemHeader("MIS.CODE");
-                item.setItemValues(new String[]{accountdetails.getBranchLocation()});
-                items.add(item);
-
+//                item = new DataItem();
+//                item.setItemHeader("VALUE.DATE");
+//                item.setItemValues(new String[]{accountdetails.getValueDate()});
+//                items.add(item);
+//                item = new DataItem();
+//                item.setItemHeader("ENT.DETAILS");
+//                item.setItemValues(new String[]{accountdetails.getIPPISnumber()});
+//                items.add(item);
+//                item = new DataItem();
+//                item.setItemHeader("MIS.CODE");
+//                item.setItemValues(new String[]{accountdetails.getBranchLocation()});
+//                items.add(item);
                 param.setDataItems(items);
                 weblogger.info("The items are " + items);
 
             } else {
-
+                String booleanhash = Boolean.toString(matched);
                 dresp = ResponseCodes.Security_violation;
                 accountdetailresp.setResponseCode(dresp.getCode());
-                accountdetailresp.setResponseText(dresp.getMessage());
+                accountdetailresp.setResponseText("Hashing is " + booleanhash);
                 accountdetailresp.setTransactionDate(zzdf.format(today));
                 weblogger.error(accountdetailresp);
                 return accountdetailresp;
@@ -186,46 +229,83 @@ public class PrimeraInterface {
             } else {
                 dresp = ResponseCodes.Invalid_transaction;
                 //accountdetailresp.setIsSuccessful(false);
-                accountdetailresp.setMessage(result.split("/")[3]);
+                accountdetailresp.setResponseText(result.split("/")[3]);
                 accountdetailresp.setResponseCode(dresp.getCode());
-                accountdetailresp.setResponseText(dresp.getMessage());
                 accountdetailresp.setTransactionDate(zzdf.format(today));
                 weblogger.fatal(accountdetailresp);
                 return accountdetailresp;
-//             
+
             }
 
-        } catch (ParseException ex) {
-
-            accountdetailresp.setIsSuccessful(false);
-
-            accountdetailresp.setMessage(ex.getMessage());
-
-            weblogger.fatal(accountdetailresp, ex);
+        } catch (Exception d) {
+            dresp = ResponseCodes.Invalid_transaction;
+            accountdetailresp.setResponseCode(dresp.getCode());
+            accountdetailresp.setResponseText(d.toString());
+            accountdetailresp.setTransactionDate(zzdf.format(today));
+            weblogger.fatal(accountdetailresp, d);
 
         }
-
         return accountdetailresp;
 
     }
 
-    @WebMethod(operationName = "AccountTransfer")
-    public ObjectResponse AccountTransfer(@WebParam(name = "fdetails") FundsTransferRequest fdetails) throws ParseException, Exception {
+    @WebMethod(operationName = "FundsTransfer")
+    public ObjectResponse FundsTransfer(@WebParam(name = "fdetails") FundsTransferRequest fdetails) throws ParseException, Exception {
 
         ObjectResponse fdetailresp = new ObjectResponse();
-        weblogger.info("AccountTransfer");
+        SimpleDateFormat zzdf;
+        zzdf = new SimpleDateFormat("dd MMM yyyy hh:mm:ss");
+        Date today = new Date();
+        weblogger.info("FundsTransfer");
+
         try {
+            String appID = fdetails.getApplicationID();
+            String AUTHID = fdetails.getAuthenticationID();
+            String APIKEY = fdetails.getApikey();
 
-            String stringtohash = fdetails.getCreditAccountNo() + fdetails.getDebitAccountNo();
+            if (isNullOrEmpty(AUTHID) == true || isNullOrEmpty(APIKEY) == true || isNullOrEmpty(appID) == true) {
+                dresp = ResponseCodes.Credentials_missing_or_null;
+                fdetailresp.setResponseCode(dresp.getCode());
+                fdetailresp.setResponseText(dresp.getMessage());
+                fdetailresp.setTransactionDate(zzdf.format(today));
+                return fdetailresp;
+            }
+            ResultSet rs = db.getData("select * from PrimeraClients where ApplicationID = '" + appID.trim() + "';", conn);
+            if (rs.next()) {
+                apikey = rs.getString("APIKey");
+                String receivedapikey = options.get_SHA_512_Hash(APIKEY, APIKEY);
+                if (!apikey.trim().equals(receivedapikey.trim())) {
+                    dresp = ResponseCodes.Credentials_Encryption_Error;
+                    fdetailresp.setResponseCode(dresp.getCode());
+                    fdetailresp.setResponseText(dresp.getMessage());
+                    fdetailresp.setTransactionDate(zzdf.format(today));
+                    weblogger.error(fdetailresp);
+                    return fdetailresp;
+                }
 
+                String authid = rs.getString("AuthenticationID");
+                String receivedauthID = options.get_SHA_512_Hash(AUTHID, AUTHID);
+                if (!authid.trim().equals(receivedauthID.trim())) {
+                    dresp = ResponseCodes.Credentials_Encryption_Error;
+                    fdetailresp.setResponseCode(dresp.getCode());
+                    fdetailresp.setResponseText(dresp.getMessage());
+                    fdetailresp.setTransactionDate(zzdf.format(today));
+                    weblogger.error(fdetailresp);
+                    return fdetailresp;
+                }
+            } else {
+                dresp = ResponseCodes.Invalid_Sender;
+                fdetailresp.setResponseCode(dresp.getCode());
+                fdetailresp.setResponseText(dresp.getMessage());
+                fdetailresp.setTransactionDate(zzdf.format(today));
+                weblogger.error(fdetailresp);
+                return fdetailresp;
+            }
+            String stringtohash = fdetails.getCreditAccountNo() + fdetails.getDebitAccountNo() + APIKEY;
             String requesthash = fdetails.getHash();
-
-            String intName = fdetails.getInterfaceName();
-
-            String hash = options.get_SHA_512_Hash(stringtohash, APIKey);
+            //String hash = options.generateBCrypthash(stringtohash);
             SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
             SimpleDateFormat ndf = new SimpleDateFormat("yyyyMMdd");
-            SimpleDateFormat zzdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
             Date trandate = sdf.parse(fdetails.getDRValueDate());
             //Date transdate = sdf.parse(fdetails.getOpeningDate());
@@ -235,14 +315,14 @@ public class PrimeraInterface {
             fdetails.setDRValueDate(ndf.format(trandate));
 
             ofsParam param = new ofsParam();
-            param = new ofsParam();
             param.setCredentials(credentials);
             param.setOperation("FUNDS.TRANSFER");
             param.setVersion("ICL.FT");
             param.setOptions(ofsoptions);
             param.setTransaction_id("");
 
-            if (hash.equals(requesthash) && (!intName.equals(""))) {
+            boolean matched = BCrypt.checkpw(stringtohash, requesthash);
+            if (matched == true) {
 
                 DataItem item = new DataItem();
                 item.setItemHeader("DR.FULL.NAME");
@@ -299,6 +379,11 @@ public class PrimeraInterface {
                 item.setItemHeader("CREDIT.ACCT.NO");
                 item.setItemValues(new String[]{fdetails.getCreditAccountNo()});
                 items.add(item);
+                
+                item = new DataItem();
+                item.setItemHeader("PAYMENT.DETAILS");
+                item.setItemValues(new String[]{fdetails.getNarration()});
+                items.add(item);
 
                 item = new DataItem();
                 item.setItemHeader("CREDIT.VALUE.DATE");
@@ -314,21 +399,17 @@ public class PrimeraInterface {
 
                 weblogger.info("The items are " + items);
             } else {
+                String booleanhash = Boolean.toString(matched);
                 dresp = ResponseCodes.Security_violation;
                 fdetailresp.setResponseCode(dresp.getCode());
-                fdetailresp.setResponseText(dresp.getMessage());
-                fdetailresp.setTransactionDate(sdf.format(trandate));
+                fdetailresp.setResponseText("Hashing is " + booleanhash);
+                fdetailresp.setTransactionDate(zzdf.format(today));
                 weblogger.error(fdetailresp);
                 return fdetailresp;
-
             }
-
             String ofstring = t24.generateOFSTransactString(param);
-
             String result = t24.PostMsg(ofstring);
-            Date today = Calendar.getInstance().getTime();
             if (t24.IsSuccessful(result)) {
-
                 dresp = ResponseCodes.SUCCESS;
                 fdetailresp.setTransactionID(result.split("/")[0]);
                 fdetailresp.setResponseCode(dresp.getCode());
@@ -338,23 +419,21 @@ public class PrimeraInterface {
             } else {
 
                 dresp = ResponseCodes.Invalid_transaction;
-                fdetailresp.setMessage(result.split("/")[3]);
+                fdetailresp.setResponseText(result.split("/")[3]);
                 fdetailresp.setResponseCode(dresp.getCode());
-                fdetailresp.setResponseText(dresp.getMessage());
                 fdetailresp.setTransactionDate(zzdf.format(today));
                 weblogger.error(fdetailresp);
                 return fdetailresp;
-
                 //details(result.split("/")[3]);
             }
 
-        } catch (ParseException ex) {
-            fdetailresp.setIsSuccessful(false);
-            fdetailresp.setMessage(ex.getMessage());
+        } catch (Exception ex) {
+            dresp = ResponseCodes.Invalid_transaction;
+            fdetailresp.setResponseCode(dresp.getCode());
+            fdetailresp.setTransactionDate(zzdf.format(today));
+            fdetailresp.setResponseText(ex.toString());
             weblogger.fatal(fdetailresp, ex);
-
         }
-
         return fdetailresp;
     }
 
@@ -362,20 +441,59 @@ public class PrimeraInterface {
     public ObjectResponse D2RSCustomer(@WebParam(name = "drdetails") D2RSPersonalDetailRequest drdetails) throws Exception {
 
         ObjectResponse drobjectresp = new ObjectResponse();
+        SimpleDateFormat zzdf;
+        zzdf = new SimpleDateFormat("dd MMM yyyy hh:mm:ss");
+        Date today = new Date();
         weblogger.info("D2RSCustomer");
         try {
 
-            String stringtohash = drdetails.getCustomerBVNNo() + drdetails.getFirstName();
-
+            String appID = drdetails.getApplicationID();
+            String AUTHID = drdetails.getAuthenticationID();
+            String APIKEY = drdetails.getApikey();
+            
+            if (isNullOrEmpty(AUTHID) == true || isNullOrEmpty(APIKEY) == true || isNullOrEmpty(appID) == true) {
+                dresp = ResponseCodes.Credentials_missing_or_null;
+                drobjectresp.setResponseCode(dresp.getCode());
+                drobjectresp.setResponseText(dresp.getMessage());
+                drobjectresp.setTransactionDate(zzdf.format(today));
+                return drobjectresp;
+            }
+            ResultSet rs = db.getData("select * from PrimeraClients where ApplicationID = '" + appID.trim() + "';", conn);
+            if (rs.next()) {
+                apikey = rs.getString("APIKey");
+                String receivedapikey = options.get_SHA_512_Hash(APIKEY, APIKEY);
+                if (!apikey.trim().equals(receivedapikey.trim())) {
+                    dresp = ResponseCodes.Credentials_Encryption_Error;
+                    drobjectresp.setResponseCode(dresp.getCode());
+                    drobjectresp.setResponseText(dresp.getMessage());
+                    drobjectresp.setTransactionDate(zzdf.format(today));
+                    weblogger.error(drobjectresp);
+                    return drobjectresp;
+                }
+                String authid = rs.getString("AuthenticationID");
+                String receivedauthID = options.get_SHA_512_Hash(AUTHID, AUTHID);
+                if (!authid.trim().equals(receivedauthID.trim())) {
+                    dresp = ResponseCodes.Credentials_Encryption_Error;
+                    drobjectresp.setResponseCode(dresp.getCode());
+                    drobjectresp.setResponseText(dresp.getMessage());
+                    drobjectresp.setTransactionDate(zzdf.format(today));
+                    weblogger.error(drobjectresp);
+                    return drobjectresp;
+                }
+            } else {
+                dresp = ResponseCodes.Invalid_Sender;
+                drobjectresp.setResponseCode(dresp.getCode());
+                drobjectresp.setResponseText(dresp.getMessage());
+                drobjectresp.setTransactionDate(zzdf.format(today));
+                weblogger.error(drobjectresp);
+                return drobjectresp;
+            }
+            String stringtohash = drdetails.getCustomerBVNNo() + drdetails.getFirstName() + APIKEY;
             String requesthash = drdetails.getHash();
-
-            String hash = options.get_SHA_512_Hash(stringtohash, APIKey);
-            String intName = drdetails.getInterfaceName();
+            //String hash = options.generateBCrypthash(stringtohash);
 
             SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
             SimpleDateFormat ndf = new SimpleDateFormat("yyyyMMdd");
-            SimpleDateFormat zzdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-            Date today = Calendar.getInstance().getTime();
             Date trandate = sdf.parse(drdetails.getDateofEvaluation());
             Date trandates = sdf.parse(drdetails.getDateofBirth());
             //Date transdate = sdf.parse(fdetails.getOpeningDate());
@@ -391,8 +509,8 @@ public class PrimeraInterface {
             param.setVersion("ICL.CUST.D2RS");
             param.setOptions(ofsoptions);
             param.setTransaction_id("");
-
-            if (hash.equals(requesthash) && (!intName.equals(""))) {
+            boolean matched = BCrypt.checkpw(stringtohash, requesthash);
+            if (matched == true) {
 
                 DataItem item = new DataItem();
                 item.setItemHeader("TITLE");
@@ -483,19 +601,19 @@ public class PrimeraInterface {
                 item.setItemValues(new String[]{drdetails.getCustomerBVNNo()});
                 items.add(item);
 
-                item = new DataItem();
-                item.setItemHeader("GROUP");
-                item.setItemValues(new String[]{drdetails.getGroupName()});
-                items.add(item);
-
+//                item = new DataItem();
+//                item.setItemHeader("GROUP");
+//                item.setItemValues(new String[]{drdetails.getGroupName()});
+//                items.add(item);
                 param.setDataItems(items);
 
                 weblogger.info("The items are " + items);
 
             } else {
+                String booleanhash = Boolean.toString(matched);
                 dresp = ResponseCodes.Security_violation;
                 drobjectresp.setResponseCode(dresp.getCode());
-                drobjectresp.setResponseText(dresp.getMessage());
+                drobjectresp.setResponseText("Hashing is " + booleanhash);
                 drobjectresp.setTransactionDate(zzdf.format(today));
                 weblogger.error(drobjectresp);
                 return drobjectresp;
@@ -516,18 +634,19 @@ public class PrimeraInterface {
 
             } else {
                 dresp = ResponseCodes.Invalid_transaction;
-                drobjectresp.setMessage(result.split("/")[3]);
+                drobjectresp.setResponseText(result.split("/")[3]);
                 drobjectresp.setResponseCode(dresp.getCode());
-                drobjectresp.setResponseText(dresp.getMessage());
                 drobjectresp.setTransactionDate(zzdf.format(today));
-                //details(result.split("/")[3]);
+
                 weblogger.error(drobjectresp);
                 return drobjectresp;
             }
 
-        } catch (ParseException ex) {
-            drobjectresp.setIsSuccessful(false);
-            drobjectresp.setMessage(ex.getMessage());
+        } catch (Exception ex) {
+            dresp = ResponseCodes.Invalid_transaction;
+            drobjectresp.setResponseCode(dresp.getCode());
+            drobjectresp.setTransactionDate(zzdf.format(today));
+            drobjectresp.setResponseText(ex.toString());
             weblogger.fatal(drobjectresp, ex);
         }
         return drobjectresp;
@@ -536,21 +655,63 @@ public class PrimeraInterface {
     @WebMethod(operationName = "MicroCreditCustomer")
     public ObjectResponse MicroCreditCustomer(@WebParam(name = "mcdetails") MicroCreditRequest mcdetails) throws Exception {
         ObjectResponse mcdetailresp = new ObjectResponse();
+        SimpleDateFormat zzdf;
+        zzdf = new SimpleDateFormat("dd MMM yyyy hh:mm:ss");
+        Date today = new Date();
         weblogger.info("MicroCreditCustomer");
         try {
 
-            String stringtohash = mcdetails.getFirstName() + mcdetails.getDateofBirth();
+            String appID = mcdetails.getApplicationID();
+            String AUTHID = mcdetails.getAuthenticationID();
+            String APIKEY = mcdetails.getApikey();
+            if (isNullOrEmpty(AUTHID) == true || isNullOrEmpty(APIKEY) == true || isNullOrEmpty(appID) == true) {
+                dresp = ResponseCodes.Credentials_missing_or_null;
+                mcdetailresp.setResponseCode(dresp.getCode());
+                mcdetailresp.setResponseText(dresp.getMessage());
+                mcdetailresp.setTransactionDate(zzdf.format(today));
+
+                return mcdetailresp;
+            }
+            ResultSet rs = db.getData("select * from PrimeraClients where ApplicationID = '" + appID.trim() + "';", conn);
+            if (rs.next()) {
+                apikey = rs.getString("APIKey");
+                String receivedapikey = options.get_SHA_512_Hash(APIKEY, APIKEY);
+                if (!apikey.trim().equals(receivedapikey.trim())) {
+                    dresp = ResponseCodes.Credentials_Encryption_Error;
+                    mcdetailresp.setResponseCode(dresp.getCode());
+                    mcdetailresp.setResponseText(dresp.getMessage());
+                    mcdetailresp.setTransactionDate(zzdf.format(today));
+                    weblogger.error(mcdetailresp);
+                    return mcdetailresp;
+                }
+                String authid = rs.getString("AuthenticationID");
+                String receivedauthID = options.get_SHA_512_Hash(AUTHID, AUTHID);
+                if (!authid.trim().equals(receivedauthID.trim())) {
+                    dresp = ResponseCodes.Credentials_Encryption_Error;
+                    mcdetailresp.setResponseCode(dresp.getCode());
+                    mcdetailresp.setResponseText(dresp.getMessage());
+                    mcdetailresp.setTransactionDate(zzdf.format(today));
+                    weblogger.error(mcdetailresp);
+                    return mcdetailresp;
+                }
+            } else {
+                dresp = ResponseCodes.Invalid_Sender;
+                mcdetailresp.setResponseCode(dresp.getCode());
+                mcdetailresp.setResponseText(dresp.getMessage());
+                mcdetailresp.setTransactionDate(zzdf.format(today));
+                weblogger.error(mcdetailresp);
+                return mcdetailresp;
+            }
+            String stringtohash = mcdetails.getFirstName() + mcdetails.getDateofBirth() + APIKEY;
 
             String requesthash = mcdetails.getHash();
 
-            String hash = options.get_SHA_512_Hash(stringtohash, APIKey);
+            //String hash = options.generateBCrypthash(stringtohash);
             String intName = mcdetails.getInterfaceName();
 
             SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
             SimpleDateFormat ndf = new SimpleDateFormat("yyyyMMdd");
-            SimpleDateFormat zzdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
-            Date today = Calendar.getInstance().getTime();
             Date trandate = sdf.parse(mcdetails.getDateofBirth());
             Date transdate = sdf.parse(mcdetails.getCustomerOpeningDate());
             Date transdates = sdf.parse(mcdetails.getBusinesStartDate());
@@ -569,7 +730,9 @@ public class PrimeraInterface {
             param.setOptions(ofsoptions);
             param.setTransaction_id("");
 
-            if (hash.equals(requesthash) && (!intName.equals(""))) {
+            boolean matched = BCrypt.checkpw(stringtohash, requesthash);
+
+            if (matched == true) {
                 DataItem item = new DataItem();
                 item.setItemHeader("SHORT.NAME");
                 item.setItemValues(new String[]{mcdetails.getSurname()});
@@ -658,16 +821,15 @@ public class PrimeraInterface {
 //                item.setItemHeader("YOUR.REFER");
 //                item.setItemValues(new String[]{mcdetails.getPrimeraRefer()});
 //                items.add(item);
-                item = new DataItem();
-                item.setItemHeader("REFER.NAME");
-                item.setItemValues(new String[]{mcdetails.getRefereeName()});
-                items.add(item);
-
-                item = new DataItem();
-                item.setItemHeader("REFEREE.PHONE");
-                item.setItemValues(new String[]{mcdetails.getRefereePhoneNo()});
-                items.add(item);
-
+//                item = new DataItem();
+//                item.setItemHeader("REFER.NAME");
+//                item.setItemValues(new String[]{mcdetails.getRefereeName()});
+//                items.add(item);
+//
+//                item = new DataItem();
+//                item.setItemHeader("REFEREE.PHONE");
+//                item.setItemValues(new String[]{mcdetails.getRefereePhoneNo()});
+//                items.add(item);
                 item = new DataItem();
                 item.setItemHeader("BUSINESS.ST.DT");
                 item.setItemValues(new String[]{mcdetails.getBusinesStartDate()});
@@ -678,9 +840,10 @@ public class PrimeraInterface {
                 weblogger.info("The items are " + items);
 
             } else {
+                String booleanhash = Boolean.toString(matched);
                 dresp = ResponseCodes.Security_violation;
                 mcdetailresp.setResponseCode(dresp.getCode());
-                mcdetailresp.setResponseText(dresp.getMessage());
+                mcdetailresp.setResponseText("Hashing is " + booleanhash);
                 mcdetailresp.setTransactionDate(zzdf.format(today));
                 weblogger.error(mcdetailresp);
                 return mcdetailresp;
@@ -699,9 +862,8 @@ public class PrimeraInterface {
                 weblogger.info(mcdetailresp);
             } else {
                 dresp = ResponseCodes.Invalid_transaction;
-                mcdetailresp.setMessage(result.split("/")[3]);
+                mcdetailresp.setResponseText(result.split("/")[3]);
                 mcdetailresp.setResponseCode(dresp.getCode());
-                mcdetailresp.setResponseText(dresp.getMessage());
                 mcdetailresp.setTransactionDate(zzdf.format(today));
                 weblogger.fatal(mcdetailresp);
                 return mcdetailresp;
@@ -709,9 +871,12 @@ public class PrimeraInterface {
                 //details(result.split("/")[3]);
             }
 
-        } catch (ParseException ex) {
-            mcdetailresp.setIsSuccessful(false);
-            mcdetailresp.setMessage(ex.getMessage());
+        } catch (Exception ex) {
+            dresp = ResponseCodes.Invalid_transaction;
+            mcdetailresp.setResponseCode(dresp.getCode());
+            mcdetailresp.setTransactionDate(zzdf.format(today));
+           
+            mcdetailresp.setResponseText(ex.toString());
             weblogger.fatal(mcdetailresp, ex);
         }
 
@@ -722,23 +887,65 @@ public class PrimeraInterface {
     @WebMethod(operationName = "IndividualCustomer")
     public ObjectResponse IndividualCustomer(@WebParam(name = "indetails") IndividualCustomerRequest indetails) throws ParseException, Exception {
         ObjectResponse indetailresp = new ObjectResponse();
+        SimpleDateFormat zzdf;
+        zzdf = new SimpleDateFormat("dd MMM yyyy hh:mm:ss");
+        Date today = new Date();
         weblogger.info("IndividualCustomer");
         try {
+            String appID = indetails.getApplicationID();
+            String AUTHID = indetails.getAuthenticationID();
+            String APIKEY = indetails.getApikey();
 
-            String stringtohash = indetails.getFirstName() + indetails.getCustomerBVNNo();
+            if (isNullOrEmpty(AUTHID) == true || isNullOrEmpty(APIKEY) == true || isNullOrEmpty(appID) == true) {
+                dresp = ResponseCodes.Credentials_missing_or_null;
+                indetailresp.setResponseCode(dresp.getCode());
+                indetailresp.setResponseText(dresp.getMessage());
+                indetailresp.setTransactionDate(zzdf.format(today));
+                return indetailresp;
+            }
+            ResultSet rs = db.getData("select * from PrimeraClients where ApplicationID = '" + appID.trim() + "';", conn);
+            if (rs.next()) {
+                apikey = rs.getString("APIKey");
+                String receivedapikey = options.get_SHA_512_Hash(APIKEY, APIKEY);
+                if (!apikey.trim().equals(receivedapikey.trim())) {
+                    dresp = ResponseCodes.Credentials_Encryption_Error;
+                    indetailresp.setResponseCode(dresp.getCode());
+                    indetailresp.setResponseText(dresp.getMessage());
+                    indetailresp.setTransactionDate(zzdf.format(today));
+                    weblogger.error(indetailresp);
+                    return indetailresp;
+                }
+                String authid = rs.getString("AuthenticationID");
+                String receivedauthID = options.get_SHA_512_Hash(AUTHID, AUTHID);
+                if (!authid.trim().equals(receivedauthID.trim())) {
+                    dresp = ResponseCodes.Credentials_Encryption_Error;
+                    indetailresp.setResponseCode(dresp.getCode());
+                    indetailresp.setResponseText(dresp.getMessage());
+                    indetailresp.setTransactionDate(zzdf.format(today));
+                    weblogger.error(indetailresp);
+                    return indetailresp;
+                }
+            } else {
+                dresp = ResponseCodes.Invalid_Sender;
+                indetailresp.setResponseCode(dresp.getCode());
+                indetailresp.setResponseText(dresp.getMessage());
+                indetailresp.setTransactionDate(zzdf.format(today));
+                weblogger.error(indetailresp);
+                return indetailresp;
+            }
+
+            String stringtohash = indetails.getFirstName() + indetails.getCustomerBVNNo() + APIKEY;
 
             String requesthash = indetails.getHash();
 
             String intName = indetails.getInterfaceName();
 
-            String hash = options.get_SHA_512_Hash(stringtohash, APIKey);
+            //String hash = options.generateBCrypthash(stringtohash);
             SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
             SimpleDateFormat ndf = new SimpleDateFormat("yyyyMMdd");
-            SimpleDateFormat zzdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
             Date trandate = sdf.parse(indetails.getDateofBirth());
             Date transdate = sdf.parse(indetails.getCustomerOpeningDate());
-            Date today = Calendar.getInstance().getTime();
             String[] ofsoptions = new String[]{"", "I", "PROCESS", "", "0"};
             String[] credentials = new String[]{Ofsuser, Ofspass};
             List<DataItem> items = new LinkedList<>();
@@ -751,8 +958,8 @@ public class PrimeraInterface {
             param.setVersion("ICL.CUST.INDIVIDUAL");
             param.setOptions(ofsoptions);
             param.setTransaction_id("");
-
-            if (hash.equals(requesthash) && (!intName.equals(""))) {
+            boolean matched = BCrypt.checkpw(stringtohash, requesthash);
+            if (matched == true) {
 
                 DataItem item = new DataItem();
                 item.setItemHeader("TITLE");
@@ -841,26 +1048,25 @@ public class PrimeraInterface {
                 item.setItemValues(new String[]{add});
                 items.add(item);
 
-                item = new DataItem();
-                item.setItemHeader("MIS.CODE");
-                item.setItemValues(new String[]{indetails.getBranchMISCode()});
-                items.add(item);
-
-                item = new DataItem();
-                item.setItemHeader("L.ACC.OFFICER");
-                item.setItemValues(new String[]{indetails.getIntroducer()});
-                items.add(item);
-
-                item = new DataItem();
-                item.setItemHeader("075CLUB.ID");
-                item.setItemValues(new String[]{indetails.getCLUBREFNO()});
-                items.add(item);
-
-                item = new DataItem();
-                item.setItemHeader("YOUR.REFER");
-                item.setItemValues(new String[]{indetails.getPrimeraRefer()});
-                items.add(item);
-
+//                item = new DataItem();
+//                item.setItemHeader("MIS.CODE");
+//                item.setItemValues(new String[]{indetails.getBranchMISCode()});
+//                items.add(item);
+//
+//                item = new DataItem();
+//                item.setItemHeader("L.ACC.OFFICER");
+//                item.setItemValues(new String[]{indetails.getIntroducer()});
+//                items.add(item);
+//
+//                item = new DataItem();
+//                item.setItemHeader("075CLUB.ID");
+//                item.setItemValues(new String[]{indetails.getCLUBREFNO()});
+//                items.add(item);
+//
+//                item = new DataItem();
+//                item.setItemHeader("YOUR.REFER");
+//                item.setItemValues(new String[]{indetails.getPrimeraRefer()});
+//                items.add(item);
                 item = new DataItem();
                 item.setItemHeader("MNEMONIC");
                 item.setItemValues(new String[]{indetails.getMnemonic()});
@@ -870,25 +1076,26 @@ public class PrimeraInterface {
                 item.setItemHeader("SECTOR");
                 item.setItemValues(new String[]{indetails.getSector()});
                 items.add(item);
-
-                item = new DataItem();
-                item.setItemHeader("REFER.NAME");
-                item.setItemValues(new String[]{indetails.getRefereeName()});
-                items.add(item);
-
-                item = new DataItem();
-                item.setItemHeader("REFEREE.PHONE");
-                item.setItemValues(new String[]{indetails.getRefereePhoneNo()});
-                items.add(item);
+//
+//                item = new DataItem();
+//                item.setItemHeader("REFER.NAME");
+//                item.setItemValues(new String[]{indetails.getRefereeName()});
+//                items.add(item);
+//
+//                item = new DataItem();
+//                item.setItemHeader("REFEREE.PHONE");
+//                item.setItemValues(new String[]{indetails.getRefereePhoneNo()});
+//                items.add(item);
 
                 param.setDataItems(items);
 
                 weblogger.info("The Items are " + items);
 
             } else {
+                String booleanhash = Boolean.toString(matched);
                 dresp = ResponseCodes.Security_violation;
                 indetailresp.setResponseCode(dresp.getCode());
-                indetailresp.setResponseText(dresp.getMessage());
+                indetailresp.setResponseText("Hashing is " + booleanhash);
                 indetailresp.setTransactionDate(zzdf.format(today));
                 weblogger.error(indetailresp);
                 return indetailresp;
@@ -909,9 +1116,8 @@ public class PrimeraInterface {
             } else {
 
                 dresp = ResponseCodes.Invalid_transaction;
-                indetailresp.setMessage(result.split("/")[3]);
+                indetailresp.setResponseText(result.split("/")[3]);
                 indetailresp.setResponseCode(dresp.getCode());
-                indetailresp.setResponseText(dresp.getMessage());
                 indetailresp.setTransactionDate(zzdf.format(today));
                 weblogger.fatal(indetailresp);
                 return indetailresp;
@@ -920,32 +1126,76 @@ public class PrimeraInterface {
             }
 
         } catch (ParseException ex) {
-            indetailresp.setIsSuccessful(false);
-            indetailresp.setMessage(ex.getMessage());
+            dresp = ResponseCodes.Invalid_transaction;
+            indetailresp.setResponseCode(dresp.getCode());
+            indetailresp.setTransactionDate(zzdf.format(today));
+       
+            indetailresp.setResponseText(ex.toString());
             weblogger.fatal(indetailresp, ex);
         }
-
         return indetailresp;
-
     }
 
     @WebMethod(operationName = "NonIndividualCustomer")
     public ObjectResponse NonIndividualCustomer(@WebParam(name = "nindetails") NonIndividualCustomerRequest nindetails) throws Exception {
         ObjectResponse nindetailresp = new ObjectResponse();
+        SimpleDateFormat zzdf;
+        zzdf = new SimpleDateFormat("dd MMM yyyy hh:mm:ss");
+        Date today = new Date();
         weblogger.info("NonIndividualCustomer");
         try {
-            String stringtohash = nindetails.getCustomerOpeningDate() + nindetails.getDateRegistered();
+            String appID = nindetails.getApplicationID();
+            String AUTHID = nindetails.getAuthenticationID();
+            String APIKEY = nindetails.getApikey();
+
+            if (isNullOrEmpty(AUTHID) == true || isNullOrEmpty(APIKEY) == true || isNullOrEmpty(appID) == true) {
+                dresp = ResponseCodes.Credentials_missing_or_null;
+                nindetailresp.setResponseCode(dresp.getCode());
+                nindetailresp.setResponseText(dresp.getMessage());
+                nindetailresp.setTransactionDate(zzdf.format(today));
+                return nindetailresp;
+            }
+            ResultSet rs = db.getData("select * from PrimeraClients where ApplicationID = '" + appID.trim() + "';", conn);
+            if (rs.next()) {
+                apikey = rs.getString("APIKey");
+                String receivedapikey = options.get_SHA_512_Hash(APIKEY, APIKEY);
+                if (!apikey.trim().equals(receivedapikey.trim())) {
+                    dresp = ResponseCodes.Credentials_Encryption_Error;
+                    nindetailresp.setResponseCode(dresp.getCode());
+                    nindetailresp.setResponseText(dresp.getMessage());
+                    nindetailresp.setTransactionDate(zzdf.format(today));
+                    weblogger.error(nindetailresp);
+                    return nindetailresp;
+                }
+                String authid = rs.getString("AuthenticationID");
+                String receivedauthID = options.get_SHA_512_Hash(AUTHID, AUTHID);
+                if (!authid.trim().equals(receivedauthID.trim())) {
+                    dresp = ResponseCodes.Credentials_Encryption_Error;
+                    nindetailresp.setResponseCode(dresp.getCode());
+                    nindetailresp.setResponseText(dresp.getMessage());
+                    nindetailresp.setTransactionDate(zzdf.format(today));
+                    weblogger.error(nindetailresp);
+                    return nindetailresp;
+                }
+            } else {
+                dresp = ResponseCodes.Invalid_Sender;
+                nindetailresp.setResponseCode(dresp.getCode());
+                nindetailresp.setResponseText(dresp.getMessage());
+                nindetailresp.setTransactionDate(zzdf.format(today));
+                weblogger.error(nindetailresp);
+                return nindetailresp;
+            }
+
+            String stringtohash = nindetails.getCustomerOpeningDate() + nindetails.getDateRegistered() + APIKEY;
 
             String requesthash = nindetails.getHash();
 
             String intName = nindetails.getInterfaceName();
 
-            String hash = options.get_SHA_512_Hash(stringtohash, APIKey);
+            //String hash = options.generateBCrypthash(stringtohash);
             SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
             SimpleDateFormat ndf = new SimpleDateFormat("yyyyMMdd");
-            SimpleDateFormat zzdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
-            Date today = Calendar.getInstance().getTime();
             Date trandate = sdf.parse(nindetails.getDateRegistered());
             Date transdate = sdf.parse(nindetails.getCustomerOpeningDate());
             Date transsdate = sdf.parse(nindetails.getBusinessstartdate());
@@ -962,8 +1212,8 @@ public class PrimeraInterface {
             param.setVersion("ICL.CUST.NON-INDIVIDUAL.NEW2");
             param.setOptions(ofsoptions);
             param.setTransaction_id("");
-
-            if (hash.equals(requesthash) && (!intName.equals(""))) {
+            boolean matched = BCrypt.checkpw(stringtohash, requesthash);
+            if (matched == true) {
 
                 DataItem item = new DataItem();
                 item.setItemHeader("SHORT.NAME");
@@ -973,7 +1223,7 @@ public class PrimeraInterface {
                 item = new DataItem();
                 item.setItemHeader("MNEMONIC");
                 String mne = nindetails.getNameofEntity();
-                String fmne = mne.substring(0, 3) + ".1";
+                String fmne = mne.substring(0, 3) + options.GenerateRandomNumber(2);
                 item.setItemValues(new String[]{fmne});
                 items.add(item);
 
@@ -1081,9 +1331,11 @@ public class PrimeraInterface {
 
                 weblogger.info("The items are " + items);
             } else {
+                String booleanhash = Boolean.toString(matched);
                 dresp = ResponseCodes.Security_violation;
                 nindetailresp.setResponseCode(dresp.getCode());
-                nindetailresp.setResponseText(dresp.getMessage());
+                nindetailresp.setResponseText("Hashing is " + booleanhash);
+                nindetailresp.setTransactionDate(zzdf.format(today));
                 weblogger.error(nindetailresp);
                 return nindetailresp;
 
@@ -1104,9 +1356,8 @@ public class PrimeraInterface {
             } else {
 
                 dresp = ResponseCodes.Invalid_transaction;
-                nindetailresp.setMessage(result.split("/")[3]);
+                nindetailresp.setResponseText(result.split("/")[3]);
                 nindetailresp.setResponseCode(dresp.getCode());
-                nindetailresp.setResponseText(dresp.getMessage());
                 nindetailresp.setTransactionDate(zzdf.format(today));
                 weblogger.fatal(nindetailresp);
                 return nindetailresp;
@@ -1114,8 +1365,11 @@ public class PrimeraInterface {
             }
 
         } catch (ParseException ex) {
-            nindetailresp.setIsSuccessful(false);
-            nindetailresp.setMessage(ex.getMessage());
+            dresp = ResponseCodes.Invalid_transaction;
+            nindetailresp.setResponseCode(dresp.getCode());
+            nindetailresp.setTransactionDate(zzdf.format(today));
+           
+            nindetailresp.setResponseText(ex.toString());
             weblogger.fatal(nindetailresp, ex);
         }
 
@@ -1125,23 +1379,68 @@ public class PrimeraInterface {
     @WebMethod(operationName = "PayrollLoan")
     public ObjectResponse PayrollLoan(@WebParam(name = "loansdeposits") AbjLoansRequest loansdeposits) throws Exception {
         ObjectResponse loansdepositsresp = new ObjectResponse();
+        SimpleDateFormat zzdf;
+        zzdf = new SimpleDateFormat("dd MMM yyyy hh:mm:ss");
+        Date today = new Date();
         weblogger.info("PayrollLoan");
         try {
+
+            String appID = loansdeposits.getApplicationID();
+            String AUTHID = loansdeposits.getAuthenticationID();
+            String APIKEY = loansdeposits.getApikey();
+
+            if (isNullOrEmpty(AUTHID) == true || isNullOrEmpty(APIKEY) == true || isNullOrEmpty(appID) == true) {
+                dresp = ResponseCodes.Credentials_missing_or_null;
+                loansdepositsresp.setResponseCode(dresp.getCode());
+                loansdepositsresp.setResponseText(dresp.getMessage());
+                loansdepositsresp.setTransactionDate(zzdf.format(today));
+                return loansdepositsresp;
+            }
+
+            ResultSet rs = db.getData("select * from PrimeraClients where ApplicationID = '" + appID.trim() + "';", conn);
+            if (rs.next()) {
+                apikey = rs.getString("APIKey");
+                String receivedapikey = options.get_SHA_512_Hash(APIKEY, APIKEY);
+                if (!apikey.trim().equals(receivedapikey.trim())) {
+                    dresp = ResponseCodes.Credentials_Encryption_Error;
+                    loansdepositsresp.setResponseCode(dresp.getCode());
+                    loansdepositsresp.setResponseText(dresp.getMessage());
+                    loansdepositsresp.setTransactionDate(zzdf.format(today));
+                    weblogger.error(loansdepositsresp);
+                    return loansdepositsresp;
+                }
+                String authid = rs.getString("AuthenticationID");
+                String receivedauthID = options.get_SHA_512_Hash(AUTHID, AUTHID);
+                if (!authid.trim().equals(receivedauthID.trim())) {
+                    dresp = ResponseCodes.Credentials_Encryption_Error;
+                    loansdepositsresp.setResponseCode(dresp.getCode());
+                    loansdepositsresp.setResponseText(dresp.getMessage());
+                    loansdepositsresp.setTransactionDate(zzdf.format(today));
+                    weblogger.error(loansdepositsresp);
+                    return loansdepositsresp;
+                }
+            } else {
+                dresp = ResponseCodes.Invalid_Sender;
+                loansdepositsresp.setResponseCode(dresp.getCode());
+                loansdepositsresp.setResponseText(dresp.getMessage());
+                loansdepositsresp.setTransactionDate(zzdf.format(today));
+                weblogger.error(loansdepositsresp);
+                return loansdepositsresp;
+            }
+
             SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
             SimpleDateFormat ndf = new SimpleDateFormat("yyyyMMdd");
-            SimpleDateFormat zzdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
-            String stringtohash = loansdeposits.getCustomer() + loansdeposits.getLoanApprovedDate();
+            String stringtohash = loansdeposits.getCustomer() + loansdeposits.getLoanApprovedDate() + APIKEY;
 
             String requesthash = loansdeposits.getHash();
 
             String intName = loansdeposits.getInterfaceName();
-            String hash = options.get_SHA_512_Hash(stringtohash, APIKey);
+            //String hash = options.generateBCrypthash(stringtohash);
 
             Date trandate = sdf.parse(loansdeposits.getValueDate());
             Date transdate = sdf.parse(loansdeposits.getMaturityDate());
             Date tramdate = sdf.parse(loansdeposits.getLoanApprovedDate());
-            Date today = Calendar.getInstance().getTime();
 
             String[] ofsoptions = new String[]{"", "I", "PROCESS", "", "0"};
             String[] credentials = new String[]{Ofsuser, Ofspass};
@@ -1157,7 +1456,9 @@ public class PrimeraInterface {
             param.setVersion("ABJ.LOANS");
             param.setOptions(ofsoptions);
             param.setTransaction_id("");
-            if (hash.equals(requesthash) && (!intName.equals(""))) {
+            boolean matched = BCrypt.checkpw(stringtohash, requesthash);
+
+            if (matched == true) {
                 DataItem item = new DataItem();
                 item.setItemHeader("LOAN.APPL.ID");
                 item.setItemValues(new String[]{loansdeposits.getLoanApplicationID()});
@@ -1222,9 +1523,11 @@ public class PrimeraInterface {
                 weblogger.info("The items are " + items);
 
             } else {
+                String booleanhash = Boolean.toString(matched);
                 dresp = ResponseCodes.Security_violation;
                 loansdepositsresp.setResponseCode(dresp.getCode());
                 loansdepositsresp.setResponseText(dresp.getMessage());
+                loansdepositsresp.setMessage("Hashing is " + booleanhash);
                 loansdepositsresp.setTransactionDate(zzdf.format(today));
                 weblogger.error(loansdepositsresp);
                 return loansdepositsresp;
@@ -1254,8 +1557,12 @@ public class PrimeraInterface {
             }
 
         } catch (ParseException ex) {
-            loansdepositsresp.setIsSuccessful(false);
-            loansdepositsresp.setMessage(ex.getMessage());
+            dresp = ResponseCodes.Invalid_transaction;
+            loansdepositsresp.setResponseCode(dresp.getCode());
+            loansdepositsresp.setResponseText(dresp.getMessage());
+            loansdepositsresp.setTransactionDate(zzdf.format(today));
+        
+            loansdepositsresp.setMessage(ex.toString());
             weblogger.fatal(loansdepositsresp, ex);
 
         }
@@ -1267,29 +1574,72 @@ public class PrimeraInterface {
     @WebMethod(operationName = "FormalLoan")
     public ObjectResponse FormalLoan(@WebParam(name = "icldeposit") IclCashLoanRequest icldeposit) throws Exception {
         ObjectResponse icldepositresp = new ObjectResponse();
+        SimpleDateFormat zzdf;
+        zzdf = new SimpleDateFormat("dd MMM yyyy hh:mm:ss");
+        Date today = new Date();
         weblogger.info("FormalLoan");
         try {
+            String appID = icldeposit.getApplicationID();
+            String AUTHID = icldeposit.getAuthenticationID();
+            String APIKEY = icldeposit.getApikey();
 
-            String stringtohash = icldeposit.getCustomer() + icldeposit.getMaturityDate();
+            if (isNullOrEmpty(AUTHID) == true || isNullOrEmpty(APIKEY) == true || isNullOrEmpty(appID) == true) {
+                dresp = ResponseCodes.Credentials_missing_or_null;
+                icldepositresp.setResponseCode(dresp.getCode());
+                icldepositresp.setResponseText(dresp.getMessage());
+                icldepositresp.setTransactionDate(zzdf.format(today));
+                weblogger.error(icldepositresp);
+                return icldepositresp;
+            }
 
+            ResultSet rs = db.getData("select * from PrimeraClients where ApplicationID = '" + appID.trim() + "';", conn);
+            if (rs.next()) {
+                apikey = rs.getString("APIKey");
+                String receivedapikey = options.get_SHA_512_Hash(APIKEY, APIKEY);
+                if (!apikey.trim().equals(receivedapikey.trim())) {
+                    dresp = ResponseCodes.Credentials_Encryption_Error;
+                    icldepositresp.setResponseCode(dresp.getCode());
+                    icldepositresp.setResponseText(dresp.getMessage());
+                    icldepositresp.setTransactionDate(zzdf.format(today));
+                    weblogger.error(icldepositresp);
+                    return icldepositresp;
+                }
+                String authid = rs.getString("AuthenticationID");
+                String receivedauthID = options.get_SHA_512_Hash(AUTHID, AUTHID);
+                if (!authid.trim().equals(receivedauthID.trim())) {
+                    dresp = ResponseCodes.Credentials_Encryption_Error;
+                    icldepositresp.setResponseCode(dresp.getCode());
+                    icldepositresp.setResponseText(dresp.getMessage());
+                    icldepositresp.setTransactionDate(zzdf.format(today));
+                    weblogger.error(icldepositresp);
+                    return icldepositresp;
+                }
+            } else {
+                dresp = ResponseCodes.Invalid_Sender;
+                icldepositresp.setResponseCode(dresp.getCode());
+                icldepositresp.setResponseText(dresp.getMessage());
+                icldepositresp.setTransactionDate(zzdf.format(today));
+                weblogger.error(icldepositresp);
+                return icldepositresp;
+            }
+            String stringtohash = icldeposit.getCustomer() + icldeposit.getMaturityDate() + APIKEY;
             String requesthash = icldeposit.getHash();
-
             String intName = icldeposit.getInterfaceName();
+
             double intrate = icldeposit.getInterestRate();
             int loanamount = icldeposit.getLoanAmount();
 
-            String hash = options.get_SHA_512_Hash(stringtohash, APIKey);
+            //String hash = options.generateBCrypthash(stringtohash);
             List<DataItem> items = new LinkedList<>();
             List<DataItem> items2 = new LinkedList<>();
 
             SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
             SimpleDateFormat ndf = new SimpleDateFormat("yyyyMMdd");
-            SimpleDateFormat zzdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
             Date trandate = sdf.parse(icldeposit.getValueDate());
             Date transdate = sdf.parse(icldeposit.getMaturityDate());
             Date repaydate = sdf.parse(icldeposit.getRepaymentStartDate());
-            Date today = Calendar.getInstance().getTime();
+
             String[] ofsoptions = new String[]{"", "I", "PROCESS", "", "1"};
             String[] credentials = new String[]{Ofsuser, Ofspass};
 
@@ -1303,8 +1653,9 @@ public class PrimeraInterface {
             param.setVersion("ICL.CASH.LOAN.4");
             param.setOptions(ofsoptions);
             param.setTransaction_id("");
+            boolean matched = BCrypt.checkpw(stringtohash, requesthash);
 
-            if (hash.equals(requesthash) && (!intName.equals(""))) {
+            if (matched == true) {
                 DataItem item = new DataItem();
                 item.setItemHeader("CUSTOMER.ID");
                 item.setItemValues(new String[]{icldeposit.getCustomer()});
@@ -1313,6 +1664,11 @@ public class PrimeraInterface {
                 item = new DataItem();
                 item.setItemHeader("CATEGORY");
                 item.setItemValues(new String[]{icldeposit.getCategory()});
+                items.add(item);
+                
+                item = new DataItem();
+                item.setItemHeader("INTERFACE.NAME");
+                item.setItemValues(new String[]{appID});
                 items.add(item);
 
                 item = new DataItem();
@@ -1462,9 +1818,10 @@ public class PrimeraInterface {
                 param.setDataItems(items);
 
             } else {
+                String booleanhash = Boolean.toString(matched);
                 dresp = ResponseCodes.Security_violation;
                 icldepositresp.setResponseCode(dresp.getCode());
-                icldepositresp.setResponseText(dresp.getMessage());
+                icldepositresp.setResponseText("Hashing is " + booleanhash);
                 icldepositresp.setTransactionDate(zzdf.format(today));
                 weblogger.error(icldepositresp);
                 return icldepositresp;
@@ -1482,58 +1839,35 @@ public class PrimeraInterface {
             item2.setItemValues(new String[]{"1"});
             items2.add(item2);
 
-//            item2 = new DataItem();
-//            item2.setItemHeader("BASE.DATE.KEY");
-//            item2.setItemValues(new String[]{"1"});
-//            items2.add(item2);
-//
-//            item2 = new DataItem();
-//            item2.setItemHeader("SCH.TYPE");
-//            item2.setItemValues(new String[]{"P", "F"});
-//            items2.add(item2);
-//
-//            item2 = new DataItem();
-//            item2.setItemHeader("CURRENCY");
-//            item2.setItemValues(new String[]{"NGN", "NGN"});
-//            items2.add(item2);
-//
-//            item2 = new DataItem();
-//            item2.setItemHeader("DATE");
-//            item2.setItemValues(new String[]{icldeposit.getRepaymentStartDate(), icldeposit.getRepaymentStartDate()});
-//            items2.add(item2);
-//
 //            int tenure = options.monthsBetween(trandate, transdate);
 //            double amount1 = options.Amount1(loanamount, tenure);
 //            double amount2 = options.Amount2(intrate, tenure, loanamount);
 //            String stramt1 = Double.toString(amount1);
 //            String stramt2 = Double.toString(amount2);
-//            item2 = new DataItem();
-//            item2.setItemHeader("AMOUNT");
-//            item2.setItemValues(new String[]{stramt1, stramt2});
-//            items2.add(item2);
-//
-//            item2 = new DataItem();
-//            item2.setItemHeader("FREQUENCY");
-//            item2.setItemValues(new String[]{"M", "M"});
-//            items2.add(item2);
-//
-//            item2 = new DataItem();
-//            item2.setItemHeader("CHARGE.CODE");
-//            item2.setItemValues(new String[]{"", "99"});
-//            items2.add(item2);
             weblogger.info("The items are " + items + items2);
 
             param.setDataItems(items2);
 
             String loanofstring = t24.generateLoanOFSTransactString(param);
-//
             String finalstring = ofstring + "//" + loanofstring;
 
             String result = t24.PostMsg(finalstring);
 
             String LoanID = (result.split("/")[0]);
 
-            if (t24.IsSuccessful(result)) {
+            String[] authoptions = new String[]{"", "A",};
+            String[] authcredentials = new String[]{Authuser, Authpass};
+
+            ofsParam params = new ofsParam();
+            params.setCredentials(authcredentials);
+            params.setOperation("LD.LOANS.AND.DEPOSITS");
+            params.setVersion("ICL.CASH.LOAN.4");
+            params.setOptions(authoptions);
+            params.setTransaction_id(LoanID);
+
+            String authstring = t24.generateAuthTransactString(params);
+            String finalresult = t24.PostMsg(authstring);
+            if (t24.IsSuccessful(finalresult)) {
                 dresp = ResponseCodes.SUCCESS;
                 icldepositresp.setTransactionID(result.split("/")[0]);
                 icldepositresp.setResponseCode(dresp.getCode());
@@ -1541,21 +1875,20 @@ public class PrimeraInterface {
                 icldepositresp.setTransactionDate(zzdf.format(today));
                 weblogger.info(icldepositresp);
             } else {
-
                 dresp = ResponseCodes.Invalid_transaction;
-                icldepositresp.setMessage(result.split("/")[3]);
+                icldepositresp.setResponseText(result.split("/")[3]);
                 icldepositresp.setResponseCode(dresp.getCode());
-                icldepositresp.setResponseText(dresp.getMessage());
                 icldepositresp.setTransactionDate(zzdf.format(today));
                 weblogger.fatal(icldepositresp);
                 return icldepositresp;
-
             }
-//
         } catch (ParseException ex) {
-            icldepositresp.setIsSuccessful(false);
-            icldepositresp.setMessage(ex.getMessage());
-
+            dresp = ResponseCodes.Invalid_transaction;
+            icldepositresp.setResponseCode(dresp.getCode());
+            icldepositresp.setResponseText(dresp.getMessage());
+            icldepositresp.setTransactionDate(zzdf.format(today));
+           
+            icldepositresp.setMessage(ex.toString());
             weblogger.fatal(icldepositresp, ex);
         }
 
@@ -1563,44 +1896,87 @@ public class PrimeraInterface {
 
     }
 
-    @WebMethod(operationName = "AuthorizeLoan")
-    public String AuthorizeLoan(@WebParam(name = "ID") String pubdeposit) throws Exception {
-        String[] ofsoptions = new String[]{"", "A",};
-        String[] credentials = new String[]{Authuser, Authpass};
-
-        ofsParam param = new ofsParam();
-        param.setCredentials(credentials);
-        param.setOperation("LD.LOANS.AND.DEPOSITS");
-        param.setVersion("ICL.CASH.LOAN.4");
-        param.setOptions(ofsoptions);
-        String LoanID = "LD1911338065";
-        param.setTransaction_id(LoanID);
-
-        String loanofstring = t24.generateAuthTransactString(param);
-        String result = t24.PostMsg(loanofstring);
-
-        return "";
-    }
-
+//    @WebMethod(operationName = "AuthorizeLoan")
+//    public String AuthorizeLoan(@WebParam(name = "ID") String pubdeposit) throws Exception {
+//        String[] ofsoptions = new String[]{"", "A",};
+//        String[] credentials = new String[]{Authuser, Authpass};
+//
+//        ofsParam param = new ofsParam();
+//        param.setCredentials(credentials);
+//        param.setOperation("LD.LOANS.AND.DEPOSITS");
+//        param.setVersion("ICL.CASH.LOAN.4");
+//        param.setOptions(ofsoptions);
+//        String LoanID = "LD1911338065";
+//        param.setTransaction_id(LoanID);
+//
+//        String loanofstring = t24.generateAuthTransactString(param);
+//        String result = t24.PostMsg(loanofstring);
+//
+//        return "";
+//    }
     @WebMethod(operationName = "PublicFederalLoan")
     public ObjectResponse PublicFederalLoan(@WebParam(name = "pubdeposit") IclPublicFederalRequest pubdeposit) throws Exception {
         ObjectResponse pubdepositresp = new ObjectResponse();
+        SimpleDateFormat zzdf;
+        zzdf = new SimpleDateFormat("dd MMM yyyy hh:mm:ss");
+        Date today = new Date();
         weblogger.info("PublicFederalLoan");
         try {
+            String appID = pubdeposit.getApplicationID();
+            String AUTHID = pubdeposit.getAuthenticationID();
+            String APIKEY = pubdeposit.getApikey();
 
-            String stringtohash = pubdeposit.getCustomer() + pubdeposit.getLoanApprovedDate();
+            if (isNullOrEmpty(AUTHID) == true || isNullOrEmpty(APIKEY) == true || isNullOrEmpty(appID) == true) {
+                dresp = ResponseCodes.Credentials_missing_or_null;
+                pubdepositresp.setResponseCode(dresp.getCode());
+                pubdepositresp.setResponseText(dresp.getMessage());
+                pubdepositresp.setTransactionDate(zzdf.format(today));
+                weblogger.error(pubdepositresp);
+                return pubdepositresp;
+            }
+
+            ResultSet rs = db.getData("select * from PrimeraClients where ApplicationID = '" + appID.trim() + "';", conn);
+            if (rs.next()) {
+                apikey = rs.getString("APIKey");
+                String receivedapikey = options.get_SHA_512_Hash(APIKEY, APIKEY);
+                if (!apikey.trim().equals(receivedapikey.trim())) {
+                    dresp = ResponseCodes.Credentials_Encryption_Error;
+                    pubdepositresp.setResponseCode(dresp.getCode());
+                    pubdepositresp.setResponseText(dresp.getMessage());
+                    pubdepositresp.setTransactionDate(zzdf.format(today));
+                    weblogger.error(pubdepositresp);
+                    return pubdepositresp;
+                }
+                String authid = rs.getString("AuthenticationID");
+                String receivedauthID = options.get_SHA_512_Hash(AUTHID, AUTHID);
+                if (!authid.trim().equals(receivedauthID.trim())) {
+                    dresp = ResponseCodes.Credentials_Encryption_Error;
+                    pubdepositresp.setResponseCode(dresp.getCode());
+                    pubdepositresp.setResponseText(dresp.getMessage());
+                    pubdepositresp.setTransactionDate(zzdf.format(today));
+                    weblogger.error(pubdepositresp);
+                    return pubdepositresp;
+                }
+            } else {
+                dresp = ResponseCodes.Invalid_Sender;
+                pubdepositresp.setResponseCode(dresp.getCode());
+                pubdepositresp.setResponseText(dresp.getMessage());
+                pubdepositresp.setTransactionDate(zzdf.format(today));
+                weblogger.error(pubdepositresp);
+                return pubdepositresp;
+            }
+            String stringtohash = pubdeposit.getCustomer() + pubdeposit.getLoanApprovedDate() + APIKEY;
 
             String requesthash = pubdeposit.getHash();
 
             String intName = pubdeposit.getInterfaceName();
-            String hash = options.get_SHA_512_Hash(stringtohash, APIKey);
+
+            //String hash = options.generateBCrypthash(stringtohash);
             List<DataItem> items = new LinkedList<>();
             List<DataItem> items2 = new LinkedList<>();
             SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
             SimpleDateFormat ndf = new SimpleDateFormat("yyyyMMdd");
-            SimpleDateFormat zzdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
-            Date today = Calendar.getInstance().getTime();
             Date trandate = sdf.parse(pubdeposit.getValueDate());
             Date transdate = sdf.parse(pubdeposit.getMaturityDate());
             Date tranndate = sdf.parse(pubdeposit.getRepaymentStartDate());
@@ -1619,8 +1995,8 @@ public class PrimeraInterface {
             param.setVersion("ICL.PUBLIC.FEDERAL1");
             param.setOptions(ofsoptions);
             param.setTransaction_id("");
-
-            if (hash.equals(requesthash) && (!intName.equals(""))) {
+            boolean matched = BCrypt.checkpw(stringtohash, requesthash);
+            if (matched == true) {
 
                 DataItem item = new DataItem();
                 item.setItemHeader("LOAN.APPL.ID");
@@ -1707,9 +2083,11 @@ public class PrimeraInterface {
                 weblogger.info("The items are " + items);
 
             } else {
+                String booleanhash = Boolean.toString(matched);
                 dresp = ResponseCodes.Security_violation;
                 pubdepositresp.setResponseCode(dresp.getCode());
                 pubdepositresp.setResponseText(dresp.getMessage());
+                pubdepositresp.setMessage("Hashing is " + booleanhash);
                 pubdepositresp.setTransactionDate(zzdf.format(today));
                 weblogger.error(pubdepositresp);
                 return pubdepositresp;
@@ -1739,8 +2117,12 @@ public class PrimeraInterface {
             }
 
         } catch (ParseException ex) {
-            pubdepositresp.setIsSuccessful(false);
-            pubdepositresp.setMessage(ex.getMessage());
+            dresp = ResponseCodes.Invalid_transaction;
+            pubdepositresp.setResponseCode(dresp.getCode());
+            pubdepositresp.setResponseText(dresp.getMessage());
+            pubdepositresp.setTransactionDate(zzdf.format(today));
+            
+            pubdepositresp.setMessage(ex.toString());
             weblogger.fatal(pubdepositresp, ex);
         }
 
@@ -1751,21 +2133,64 @@ public class PrimeraInterface {
     @WebMethod(operationName = "PublicStateLoan")
     public ObjectResponse PublicStateLoan(@WebParam(name = "statedeposit") IclPublicStateRequest statedeposit) throws Exception {
         ObjectResponse statedepositresp = new ObjectResponse();
+        SimpleDateFormat zzdf;
+        zzdf = new SimpleDateFormat("dd MMM yyyy hh:mm:ss");
+        Date today = new Date();
         weblogger.info("PublicStateLoan");
 
         try {
 
-            String stringtohash = statedeposit.getCustomer() + statedeposit.getLoanApprovedDate();
+            String appID = statedeposit.getApplicationID();
+            String AUTHID = statedeposit.getAuthenticationID();
+            String APIKEY = statedeposit.getApikey();
+
+            if (isNullOrEmpty(AUTHID) == true || isNullOrEmpty(APIKEY) == true || isNullOrEmpty(appID) == true) {
+                dresp = ResponseCodes.Credentials_missing_or_null;
+                statedepositresp.setResponseCode(dresp.getCode());
+                statedepositresp.setResponseText(dresp.getMessage());
+                statedepositresp.setTransactionDate(zzdf.format(today));
+                weblogger.error(statedepositresp);
+                return statedepositresp;
+            }
+            ResultSet rs = db.getData("select * from PrimeraClients where ApplicationID = '" + appID.trim() + "';", conn);
+            if (rs.next()) {
+                apikey = rs.getString("APIKey");
+                String receivedapikey = options.get_SHA_512_Hash(APIKEY, APIKEY);
+                if (!apikey.trim().equals(receivedapikey.trim())) {
+                    dresp = ResponseCodes.Credentials_Encryption_Error;
+                    statedepositresp.setResponseCode(dresp.getCode());
+                    statedepositresp.setResponseText(dresp.getMessage());
+                    statedepositresp.setTransactionDate(zzdf.format(today));
+                    weblogger.error(statedepositresp);
+                    return statedepositresp;
+                }
+                String authid = rs.getString("AuthenticationID");
+                String receivedauthID = options.get_SHA_512_Hash(AUTHID, AUTHID);
+                if (!authid.trim().equals(receivedauthID.trim())) {
+                    dresp = ResponseCodes.Credentials_Encryption_Error;
+                    statedepositresp.setResponseCode(dresp.getCode());
+                    statedepositresp.setResponseText(dresp.getMessage());
+                    statedepositresp.setTransactionDate(zzdf.format(today));
+                    weblogger.error(statedepositresp);
+                    return statedepositresp;
+                }
+            } else {
+                dresp = ResponseCodes.Invalid_Sender;
+                statedepositresp.setResponseCode(dresp.getCode());
+                statedepositresp.setResponseText(dresp.getMessage());
+                statedepositresp.setTransactionDate(zzdf.format(today));
+                weblogger.error(statedepositresp);
+                return statedepositresp;
+            }
+            String stringtohash = statedeposit.getCustomer() + statedeposit.getLoanApprovedDate() + APIKEY;
 
             String requesthash = statedeposit.getHash();
 
             String intName = statedeposit.getInterfaceName();
-            String hash = options.get_SHA_512_Hash(stringtohash, APIKey);
+            //String hash = options.generateBCrypthash(stringtohash);
             SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
             SimpleDateFormat ndf = new SimpleDateFormat("yyyyMMdd");
-            SimpleDateFormat zzdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
-            Date today = Calendar.getInstance().getTime();
             Date trandate = sdf.parse(statedeposit.getValueDate());
             Date transdate = sdf.parse(statedeposit.getMaturityDate());
             Date tranndate = sdf.parse(statedeposit.getRepaymentStartDate());
@@ -1787,7 +2212,8 @@ public class PrimeraInterface {
             param.setOptions(ofsoptions);
             param.setTransaction_id("");
 
-            if (hash.equals(requesthash) && (!intName.equals(""))) {
+            boolean matched = BCrypt.checkpw(stringtohash, requesthash);
+            if (matched == true) {
                 DataItem item = new DataItem();
                 item.setItemHeader("LOAN.APPL.ID");
                 item.setItemValues(new String[]{statedeposit.getLoanApplicationID()});
@@ -1873,9 +2299,11 @@ public class PrimeraInterface {
                 weblogger.info("The items are " + items);
 
             } else {
+                String booleanhash = Boolean.toString(matched);
                 dresp = ResponseCodes.Security_violation;
                 statedepositresp.setResponseCode(dresp.getCode());
                 statedepositresp.setResponseText(dresp.getMessage());
+                statedepositresp.setMessage("Hashing is " + booleanhash);
                 statedepositresp.setTransactionDate(zzdf.format(today));
                 weblogger.error(statedepositresp);
                 return statedepositresp;
@@ -1905,8 +2333,12 @@ public class PrimeraInterface {
             }
 
         } catch (ParseException ex) {
-            statedepositresp.setIsSuccessful(false);
-            statedepositresp.setMessage(ex.getMessage());
+            dresp = ResponseCodes.Invalid_transaction;
+            statedepositresp.setResponseCode(dresp.getCode());
+            statedepositresp.setResponseText(dresp.getMessage());
+            statedepositresp.setTransactionDate(zzdf.format(today));
+           
+            statedepositresp.setMessage(ex.toString());
             weblogger.fatal(statedepositresp, ex);
 
         }
@@ -1918,23 +2350,68 @@ public class PrimeraInterface {
     @WebMethod(operationName = "ChequeManagement")
     public ObjectResponse ChequeManagement(@WebParam(name = "chequecollect") ChequeCollectionRequest chequecollect) throws Exception {
         ObjectResponse chequecollectresp = new ObjectResponse();
+        SimpleDateFormat zzdf;
+        zzdf = new SimpleDateFormat("dd MMM yyyy hh:mm:ss");
+        Date today = new Date();
         weblogger.info("ChequeManagement");
 
         try {
 
-            String stringtohash = chequecollect.getCustomerLoanNo() + chequecollect.getCustomerCIF();
+            String appID = chequecollect.getApplicationID();
+            String AUTHID = chequecollect.getAuthenticationID();
+            String APIKEY = chequecollect.getApikey();
+
+            if (isNullOrEmpty(AUTHID) == true || isNullOrEmpty(APIKEY) == true || isNullOrEmpty(appID) == true) {
+                dresp = ResponseCodes.Credentials_missing_or_null;
+                chequecollectresp.setResponseCode(dresp.getCode());
+                chequecollectresp.setResponseText(dresp.getMessage());
+                chequecollectresp.setTransactionDate(zzdf.format(today));
+                weblogger.error(chequecollectresp);
+                return chequecollectresp;
+            }
+
+            ResultSet rs = db.getData("select * from PrimeraClients where ApplicationID = '" + appID.trim() + "';", conn);
+            if (rs.next()) {
+                apikey = rs.getString("APIKey");
+                String receivedapikey = options.get_SHA_512_Hash(APIKEY, APIKEY);
+                if (!apikey.trim().equals(receivedapikey.trim())) {
+                    dresp = ResponseCodes.Credentials_Encryption_Error;
+                    chequecollectresp.setResponseCode(dresp.getCode());
+                    chequecollectresp.setResponseText(dresp.getMessage());
+                    chequecollectresp.setTransactionDate(zzdf.format(today));
+                    weblogger.error(chequecollectresp);
+                    return chequecollectresp;
+                }
+                String authid = rs.getString("AuthenticationID");
+                String receivedauthID = options.get_SHA_512_Hash(AUTHID, AUTHID);
+                if (!authid.trim().equals(receivedauthID.trim())) {
+                    dresp = ResponseCodes.Credentials_Encryption_Error;
+                    chequecollectresp.setResponseCode(dresp.getCode());
+                    chequecollectresp.setResponseText(dresp.getMessage());
+                    chequecollectresp.setTransactionDate(zzdf.format(today));
+                    weblogger.error(chequecollectresp);
+                    return chequecollectresp;
+                }
+            } else {
+                dresp = ResponseCodes.Invalid_Sender;
+                chequecollectresp.setResponseCode(dresp.getCode());
+                chequecollectresp.setResponseText(dresp.getMessage());
+                chequecollectresp.setTransactionDate(zzdf.format(today));
+                weblogger.error(chequecollectresp);
+                return chequecollectresp;
+            }
+
+            String stringtohash = chequecollect.getCustomerLoanNo() + chequecollect.getCustomerCIF() + APIKEY;
 
             String requesthash = chequecollect.getHash();
 
             String intName = chequecollect.getInterfaceName();
-            String hash = options.get_SHA_512_Hash(stringtohash, APIKey);
+            //String hash = options.generateBCrypthash(stringtohash);
             SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
             SimpleDateFormat ndf = new SimpleDateFormat("yyyyMMdd");
-            SimpleDateFormat zzdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
             Date trandate = sdf.parse(chequecollect.getDateChequePresented());
             Date transdate = sdf.parse(chequecollect.getDateCollected());
-            Date today = Calendar.getInstance().getTime();
 
             String[] ofsoptions = new String[]{"", "I", "PROCESS", "", "0"};
             String[] credentials = new String[]{Ofsuser, Ofspass};
@@ -1949,8 +2426,8 @@ public class PrimeraInterface {
             param.setVersion("MAIN2");
             param.setOptions(ofsoptions);
             param.setTransaction_id("");
-
-            if (hash.equals(requesthash) && (!intName.equals(""))) {
+            boolean matched = BCrypt.checkpw(stringtohash, requesthash);
+            if (matched == true) {
                 DataItem item = new DataItem();
                 item.setItemHeader("LD.NUMBER");
                 item.setItemValues(new String[]{chequecollect.getCustomerLoanNo()});
@@ -2017,9 +2494,10 @@ public class PrimeraInterface {
                 weblogger.info("The items are " + items);
 
             } else {
+                String booleanhash = Boolean.toString(matched);
                 dresp = ResponseCodes.Security_violation;
                 chequecollectresp.setResponseCode(dresp.getCode());
-                chequecollectresp.setResponseText(dresp.getMessage());
+                chequecollectresp.setResponseText("Hashing is " + booleanhash);
                 chequecollectresp.setTransactionDate(zzdf.format(today));
                 weblogger.error(chequecollectresp);
                 return chequecollectresp;
@@ -2040,21 +2518,21 @@ public class PrimeraInterface {
 
             } else {
                 dresp = ResponseCodes.Invalid_transaction;
-                chequecollectresp.setMessage(result.split("/")[3]);
+                chequecollectresp.setResponseText(result.split("/")[3]);
                 chequecollectresp.setResponseCode(dresp.getCode());
-                chequecollectresp.setResponseText(dresp.getMessage());
                 chequecollectresp.setTransactionDate(zzdf.format(today));
                 weblogger.fatal(chequecollectresp);
                 return chequecollectresp;
             }
 
         } catch (ParseException ex) {
-            chequecollectresp.setIsSuccessful(false);
-            chequecollectresp.setMessage(ex.getMessage());
+            dresp = ResponseCodes.Invalid_transaction;
+            chequecollectresp.setResponseCode(dresp.getCode());
+            chequecollectresp.setResponseText(dresp.getMessage());
+            chequecollectresp.setTransactionDate(zzdf.format(today));
+            chequecollectresp.setMessage(ex.toString());
             weblogger.fatal(chequecollectresp, ex);
-
         }
-
         return chequecollectresp;
 
     }

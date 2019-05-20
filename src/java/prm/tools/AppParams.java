@@ -60,18 +60,12 @@ public class AppParams {
             javax.naming.Context ctx = (javax.naming.Context) new InitialContext().lookup("java:comp/env");
             Host = (String) ctx.lookup("HOST");
             port = Integer.parseInt((String) ctx.lookup("PORT"));
-
             OFSsource = (String) ctx.lookup("OFSsource");
             Ofsuser = (String) ctx.lookup("OFSuser");
             Ofspass = (String) ctx.lookup("OFSpass");
-//            ImageBase = (String) ctx.lookup("ImageBase");
-//            DBuser = (String) ctx.lookup("DBuser");
-//            DBpass = (String) ctx.lookup("DBpass");
-//            DBserver = (String) ctx.lookup("DBserver");
-//            
-//                
-//            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-//            propertiesfile = classLoader.getResourceAsStream("nip/tools/interfacelogger.properties");
+            DBuser = (String) ctx.lookup("DBuser");
+            DBpass = (String) ctx.lookup("DBpass");
+            DBserver = (String) ctx.lookup("DBserver");
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -88,12 +82,21 @@ public class AppParams {
         return (loanamt / tenor);
     }
 
+    public static boolean isNullOrEmpty(String str) {
+        return str == null || str.length() == 0 || str.trim().isEmpty();
+
+    }
+
+    public static String notNullTrim(String str) {
+        return str == null ? null : str.trim();
+
+    }
+
     public double Repayment(int loanamt, double interestrate) {
         double TotalRepayment = (interestrate / 100 * loanamt);
         return loanamt + TotalRepayment;
     }
-    
-    
+
     public double TotalInstallments(int loanamt, double interestrate) {
         double TotalRepayment = (interestrate / 100 * loanamt);
         return TotalRepayment;
@@ -140,7 +143,6 @@ public class AppParams {
 //                + (int) Math.pow(10, charLength - 1));
 //    }
     public String GenerateRandomNumber(int charLength) {
-
         Random rand = new Random();
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < charLength; i++) {
@@ -177,6 +179,14 @@ public class AppParams {
         }
 
         return respcode;
+    }
+
+    public String generateBCrypthash(String stringtohash) {
+        return BCrypt.hashpw(stringtohash, BCrypt.gensalt(12));
+    }
+
+    public boolean verifyHash(String plaintext, String hash) {
+        return BCrypt.checkpw(plaintext, hash);
     }
 
     public String get_SHA_512_Hash(String StringToHash, String salt) throws Exception {

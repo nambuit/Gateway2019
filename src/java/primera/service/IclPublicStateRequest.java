@@ -34,5 +34,7 @@ public class IclPublicStateRequest {
     private String AmountApproved;
     private String hash;
     private String InterfaceName;
-      
+    private String apikey;
+    private String applicationID;
+    private String authenticationID;
 }

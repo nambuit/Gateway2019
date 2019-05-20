@@ -12,12 +12,14 @@ import lombok.Setter;
  *
  * @author emusa
  */
-@Getter @Setter
+@Getter
+@Setter
 public class LdRpmHistRequest {
-    
-    
+
     private String loanID;
     private String hash;
-   
-    
+    private String apikey;
+    private String applicationID;
+    private String authenticationID;
+
 }

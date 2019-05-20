@@ -12,7 +12,8 @@ import lombok.Setter;
  *
  * @author dogor-Igbosuah
  */
-@Getter @Setter
+@Getter
+@Setter
 
 public class LdBalancesSumResponse {
 
@@ -25,6 +26,7 @@ public class LdBalancesSumResponse {
     private String ResponseCode;
     private String ResponseText;
     private String Message;
+    private String TransactionDate;
 
     @Override
     public String toString() {

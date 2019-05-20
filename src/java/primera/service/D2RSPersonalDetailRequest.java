@@ -32,6 +32,9 @@ public class D2RSPersonalDetailRequest {
     private String LoanOfficer;
     private String DateofEvaluation;
     private String Gender;
+    private String applicationID;
+    private String authenticationID;
+    private String apikey;
     //private String Resident;
     private String CustomerBVNNo;
     private String CustomerReferee;

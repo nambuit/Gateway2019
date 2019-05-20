@@ -4,4 +4,6 @@
     <system systemId="http://dogor-fbu:8080/PrimeraGateway/T24Interface?xsd=1" uri="src/conf/xml-resources/web-service-references/T24Interface/wsdl/dogor-fbu_8080/PrimeraGateway/T24Interface.xsd_1.xsd"/>
     <system systemId="http://applicationsvr:8080/PrimeraGateway/T24Interface?wsdl" uri="src/conf/xml-resources/web-service-references/T24Interface/wsdl/applicationsvr_8080/PrimeraGateway/T24Interface.wsdl"/>
     <system systemId="http://applicationsvr:8080/PrimeraGateway/T24Interface?xsd=1" uri="src/conf/xml-resources/web-service-references/T24Interface/wsdl/applicationsvr_8080/PrimeraGateway/T24Interface.xsd_1.xsd"/>
+    <system systemId="http://localhost:8080/PrimeraGateway/PrimeraInterface?wsdl" uri="src/conf/xml-resources/web-service-references/PrimeraInterface/wsdl/localhost_8080/PrimeraGateway/PrimeraInterface.wsdl"/>
+    <system systemId="http://localhost:8080/PrimeraGateway/PrimeraInterface?xsd=1" uri="src/conf/xml-resources/web-service-references/PrimeraInterface/wsdl/localhost_8080/PrimeraGateway/PrimeraInterface.xsd_1.xsd"/>
 </catalog>

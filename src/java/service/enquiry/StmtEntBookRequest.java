@@ -15,7 +15,7 @@ import lombok.Setter;
 @Getter @Setter
 public class StmtEntBookRequest {
     
-    private String Account;
+    private String AccountNo;
     private String BookingDate;
     private String StartDate;
     private String EndDate;
@@ -25,4 +25,8 @@ public class StmtEntBookRequest {
     private String ReversalMarker;
     private String IncludeSubAcct;
     private String ApplDrilldown;
+    private String apikey;
+    private String authenticationID;
+    private String applicationID;
+    private String hash;
 }

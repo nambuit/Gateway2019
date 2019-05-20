@@ -20,6 +20,9 @@ public class FtNarrateRequest {
     private String accountNumber;
     private String creditORdebit;
     private String hash;
+    private String apikey;
+    private String authenticationID;
+    private String applicationID;
     
 }
 

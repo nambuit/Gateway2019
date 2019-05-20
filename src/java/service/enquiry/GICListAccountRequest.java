@@ -23,5 +23,8 @@ public class GICListAccountRequest {
     private String AccountMnemonic;
     private String CurDvndPnts;
     private String hash;
+    private String apikey;
+    private String authenticationID;
+    private String applicationID;
     
 }

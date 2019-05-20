@@ -17,6 +17,7 @@ public class FundsTransferRequest {
     
     private String DebitCustomer;
     private String Currency;
+    private String narration;
     private String AccountBalance;
     private String SignInstructions;
     private String DebitAccountNo;
@@ -28,6 +29,9 @@ public class FundsTransferRequest {
     private String CreditCustomer;
     private String CreditAccountNo;
     private String CreditRef;
+    private String applicationID;
+    private String authenticationID;
+    private String apikey;
    // private String CustomerDetails;
     private String hash;
     private String InterfaceName;

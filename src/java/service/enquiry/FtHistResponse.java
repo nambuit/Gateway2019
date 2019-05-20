@@ -12,7 +12,8 @@ import lombok.Setter;
  *
  * @author dogor-Igbosuah
  */
-@Getter @Setter
+@Getter
+@Setter
 public class FtHistResponse {
 
     private String TransferReference;
@@ -28,8 +29,8 @@ public class FtHistResponse {
     private String ResponseText;
     private String Message;
     private String ProfitCenterDepartment;
+    private String TransactionDate;
 
-    
     @Override
     public String toString() {
 

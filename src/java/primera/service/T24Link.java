@@ -5,8 +5,7 @@
  */
 package primera.service;
 
-import main.service.*;
-//import com.service.*;
+
 import com.jbase.jremote.DefaultJConnectionFactory;
 import com.jbase.jremote.JConnection;
 import com.jbase.jremote.JDynArray;
@@ -233,23 +232,9 @@ public class T24Link {
             param.setTransaction_id("");
         }
         output.append(param.getTransaction_id());
-
-//        param.getDataItems().stream().forEach((dataitem) -> {
-//            Boolean isMultivalue = dataitem.getItemValues().length > 1;
-//
-//            int valuecount = 1;
-//
-//            for (String value : dataitem.getItemValues()) {
-//                output.append(dataitem.getItemHeader()).append((isMultivalue ? ":" + valuecount + ":1" + "=" + value : "=" + value)).append(",");
-//
-//                valuecount = valuecount + 1;
-//            }
-//        });
-
         String result = output.toString();
 
-        result = result.substring(0, result.length() - 1);
-
+        //result = result.substring(0, result.length() - 1);
         return result;
     }
 

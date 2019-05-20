@@ -19,6 +19,9 @@ public class FtHistRequest {
     private String accountNumber;
     private String creditORdebit;
     private String hash;
+    private String apikey;
+    private String applicationID;
+    private String authenticationID;
     
 
 }

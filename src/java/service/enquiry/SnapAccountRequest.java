@@ -18,5 +18,9 @@ public class SnapAccountRequest {
    
     private String SnapID;
     private String hash;
+     private String apikey;
+      private String authenticationID;
+       private String applicationID;
+    
     
 }

@@ -7,42 +7,7 @@
     <service name="PrimeraEnquiryInterface">
       <implementation-class>service.enquiry.PrimeraEnquiryInterface</implementation-class>
     </service>
-    <service name="T24Interface">
-      <implementation-class>main.service.latest.T24Interface</implementation-class>
-    </service>
   </services>
   <clients>
-    <client name="T24Interface">
-      <wsdl-url>http://applicationsvr:8080/PrimeraGateway/T24Interface?wsdl</wsdl-url>
-      <local-wsdl-file>applicationsvr_8080/PrimeraGateway/T24Interface.wsdl</local-wsdl-file>
-      <package-name>main.service</package-name>
-      <catalog-file>catalog.xml</catalog-file>
-      <wsimport-options>
-        <wsimport-option>
-          <wsimport-option-name>extension</wsimport-option-name>
-          <wsimport-option-value>true</wsimport-option-value>
-        </wsimport-option>
-        <wsimport-option>
-          <wsimport-option-name>verbose</wsimport-option-name>
-          <wsimport-option-value>true</wsimport-option-value>
-        </wsimport-option>
-        <wsimport-option>
-          <wsimport-option-name>fork</wsimport-option-name>
-          <wsimport-option-value>false</wsimport-option-value>
-        </wsimport-option>
-        <wsimport-option>
-          <wsimport-option-name>wsdlLocation</wsimport-option-name>
-          <wsimport-option-value>http://applicationsvr:8080/PrimeraGateway/T24Interface?wsdl</wsimport-option-value>
-        </wsimport-option>
-        <wsimport-option>
-          <wsimport-option-name>xnocompile</wsimport-option-name>
-          <wsimport-option-value>true</wsimport-option-value>
-        </wsimport-option>
-        <wsimport-option>
-          <wsimport-option-name>xendorsed</wsimport-option-name>
-          <wsimport-option-value>true</wsimport-option-value>
-        </wsimport-option>
-      </wsimport-options>
-    </client>
   </clients>
 </jax-ws>

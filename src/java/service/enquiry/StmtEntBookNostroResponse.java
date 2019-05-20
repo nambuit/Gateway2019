@@ -34,6 +34,7 @@ public class StmtEntBookNostroResponse {
     private String Narrative;
     private String CreditAcctNumber;
     private String Message;
+    private String TransactionDate;
 
     @Override
     public String toString() {

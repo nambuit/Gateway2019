@@ -31,6 +31,9 @@ public class NonIndividualCustomerRequest {
     private String businessstartdate;
     private String BVNNumber;
     private String LoanType;
+    private String apikey;
+    private String authenticationID;
+    private String applicationID;
     
     //private String CreditCheckDone;
     private String CreditIndicator;

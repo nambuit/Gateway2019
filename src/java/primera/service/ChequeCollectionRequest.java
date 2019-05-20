@@ -32,6 +32,8 @@ public class ChequeCollectionRequest {
     private String Comment;
     private String hash;
     private String InterfaceName;
-    
+    private String applicationID;
+    private String authenticationID;
+    private String apikey;
     
 }

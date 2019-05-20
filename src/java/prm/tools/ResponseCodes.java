@@ -31,6 +31,8 @@ package prm.tools;
   Invalid_Channel("17","Invalid Channel"),
   Wrong_Method_Call("18","Wrong Method Call"),
   No_action_taken("21","No action taken"),
+  Credentials_missing_or_null("22","Credentials missing or null"),
+  Credentials_Encryption_Error("22","Credentials Encryption Error"),
   Unable_to_locate_record("25","Unable to locate record"),
   Duplicate_record("26","Duplicate record"),
   Format_error("30","Format error"),

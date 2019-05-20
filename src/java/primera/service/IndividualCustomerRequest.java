@@ -42,6 +42,9 @@ public class IndividualCustomerRequest {
     private String InterfaceName;
     //private String Resident;
     private String CustomerBVNNo;
+    private String apikey;
+    private String authenticationID;
+    private String applicationID;
     //private String CustomerReferee;
     private String hash;
 }

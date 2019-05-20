@@ -1,0 +1,522 @@
+<?xml version='1.0' encoding='UTF-8'?><!-- Published by JAX-WS RI (http://jax-ws.java.net). RI's version is Metro/2.3.2-b608 (trunk-7979; 2015-01-21T12:50:19+0000) JAXWS-RI/2.2.11-b150120.1832 JAXWS-API/2.2.12 JAXB-RI/2.2.12-b141219.1637 JAXB-API/2.2.13-b141020.1521 svn-revision#unknown. --><xs:schema xmlns:tns="http://service.primera/" xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0" targetNamespace="http://service.primera/">
+
+<xs:element name="ChequeManagement" type="tns:ChequeManagement"/>
+
+<xs:element name="ChequeManagementResponse" type="tns:ChequeManagementResponse"/>
+
+<xs:element name="D2RSCustomer" type="tns:D2RSCustomer"/>
+
+<xs:element name="D2RSCustomerResponse" type="tns:D2RSCustomerResponse"/>
+
+<xs:element name="Exception" type="tns:Exception"/>
+
+<xs:element name="FormalLoan" type="tns:FormalLoan"/>
+
+<xs:element name="FormalLoanResponse" type="tns:FormalLoanResponse"/>
+
+<xs:element name="FundsTransfer" type="tns:FundsTransfer"/>
+
+<xs:element name="FundsTransferResponse" type="tns:FundsTransferResponse"/>
+
+<xs:element name="IndividualCustomer" type="tns:IndividualCustomer"/>
+
+<xs:element name="IndividualCustomerResponse" type="tns:IndividualCustomerResponse"/>
+
+<xs:element name="LoanAccount" type="tns:LoanAccount"/>
+
+<xs:element name="LoanAccountResponse" type="tns:LoanAccountResponse"/>
+
+<xs:element name="MicroCreditCustomer" type="tns:MicroCreditCustomer"/>
+
+<xs:element name="MicroCreditCustomerResponse" type="tns:MicroCreditCustomerResponse"/>
+
+<xs:element name="NonIndividualCustomer" type="tns:NonIndividualCustomer"/>
+
+<xs:element name="NonIndividualCustomerResponse" type="tns:NonIndividualCustomerResponse"/>
+
+<xs:element name="ParseException" type="tns:ParseException"/>
+
+<xs:element name="PayrollLoan" type="tns:PayrollLoan"/>
+
+<xs:element name="PayrollLoanResponse" type="tns:PayrollLoanResponse"/>
+
+<xs:element name="PublicFederalLoan" type="tns:PublicFederalLoan"/>
+
+<xs:element name="PublicFederalLoanResponse" type="tns:PublicFederalLoanResponse"/>
+
+<xs:element name="PublicStateLoan" type="tns:PublicStateLoan"/>
+
+<xs:element name="PublicStateLoanResponse" type="tns:PublicStateLoanResponse"/>
+
+<xs:complexType name="D2RSCustomer">
+<xs:sequence>
+<xs:element name="drdetails" type="tns:d2RSPersonalDetailRequest" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="d2RSPersonalDetailRequest">
+<xs:sequence>
+<xs:element name="apikey" type="xs:string" minOccurs="0"/>
+<xs:element name="applicationID" type="xs:string" minOccurs="0"/>
+<xs:element name="authenticationID" type="xs:string" minOccurs="0"/>
+<xs:element name="customerBVNNo" type="xs:string" minOccurs="0"/>
+<xs:element name="customerReferee" type="xs:string" minOccurs="0"/>
+<xs:element name="dateofBirth" type="xs:string" minOccurs="0"/>
+<xs:element name="dateofEvaluation" type="xs:string" minOccurs="0"/>
+<xs:element name="firstName" type="xs:string" minOccurs="0"/>
+<xs:element name="gender" type="xs:string" minOccurs="0"/>
+<xs:element name="groupName" type="xs:string" minOccurs="0"/>
+<xs:element name="hash" type="xs:string" minOccurs="0"/>
+<xs:element name="homeAddress" type="xs:string" minOccurs="0"/>
+<xs:element name="industry" type="xs:string" minOccurs="0"/>
+<xs:element name="initials" type="xs:string" minOccurs="0"/>
+<xs:element name="interfaceName" type="xs:string" minOccurs="0"/>
+<xs:element name="loanOfficer" type="xs:string" minOccurs="0"/>
+<xs:element name="loanType" type="xs:string" minOccurs="0"/>
+<xs:element name="maidenName" type="xs:string" minOccurs="0"/>
+<xs:element name="maritalStatus" type="xs:string" minOccurs="0"/>
+<xs:element name="middleName" type="xs:string" minOccurs="0"/>
+<xs:element name="mnemonic" type="xs:string" minOccurs="0"/>
+<xs:element name="sector" type="xs:string" minOccurs="0"/>
+<xs:element name="surname" type="xs:string" minOccurs="0"/>
+<xs:element name="title" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="D2RSCustomerResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:objectResponse" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="objectResponse">
+<xs:sequence>
+<xs:element name="amount" type="xs:string" minOccurs="0"/>
+<xs:element name="currency" type="xs:string" minOccurs="0"/>
+<xs:element name="institutionCode" type="xs:string" minOccurs="0"/>
+<xs:element name="isSuccessful" type="xs:boolean" minOccurs="0"/>
+<xs:element name="message" type="xs:string" minOccurs="0"/>
+<xs:element name="reference" type="xs:string" minOccurs="0"/>
+<xs:element name="responseCode" type="xs:string" minOccurs="0"/>
+<xs:element name="responseText" type="xs:string" minOccurs="0"/>
+<xs:element name="transRef" type="xs:string" minOccurs="0"/>
+<xs:element name="transactionDate" type="xs:string" minOccurs="0"/>
+<xs:element name="transactionID" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="Exception">
+<xs:sequence>
+<xs:element name="message" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="FundsTransfer">
+<xs:sequence>
+<xs:element name="fdetails" type="tns:fundsTransferRequest" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="fundsTransferRequest">
+<xs:sequence>
+<xs:element name="accountBalance" type="xs:string" minOccurs="0"/>
+<xs:element name="apikey" type="xs:string" minOccurs="0"/>
+<xs:element name="applicationID" type="xs:string" minOccurs="0"/>
+<xs:element name="authenticationID" type="xs:string" minOccurs="0"/>
+<xs:element name="costCenter" type="xs:string" minOccurs="0"/>
+<xs:element name="creditAccountNo" type="xs:string" minOccurs="0"/>
+<xs:element name="creditCustomer" type="xs:string" minOccurs="0"/>
+<xs:element name="creditRef" type="xs:string" minOccurs="0"/>
+<xs:element name="currency" type="xs:string" minOccurs="0"/>
+<xs:element name="DRValueDate" type="xs:string" minOccurs="0"/>
+<xs:element name="debitAccountNo" type="xs:string" minOccurs="0"/>
+<xs:element name="debitAmount" type="xs:string" minOccurs="0"/>
+<xs:element name="debitCustomer" type="xs:string" minOccurs="0"/>
+<xs:element name="debitRef" type="xs:string" minOccurs="0"/>
+<xs:element name="hash" type="xs:string" minOccurs="0"/>
+<xs:element name="interfaceName" type="xs:string" minOccurs="0"/>
+<xs:element name="orderedBy" type="xs:string" minOccurs="0"/>
+<xs:element name="signInstructions" type="xs:string" minOccurs="0"/>
+<xs:element name="transRef" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="FundsTransferResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:objectResponse" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="ParseException">
+<xs:sequence>
+<xs:element name="errorOffset" type="xs:int"/>
+<xs:element name="message" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="PublicFederalLoan">
+<xs:sequence>
+<xs:element name="pubdeposit" type="tns:iclPublicFederalRequest" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="iclPublicFederalRequest">
+<xs:sequence>
+<xs:element name="accountOfficer" type="xs:string" minOccurs="0"/>
+<xs:element name="amountApproved" type="xs:string" minOccurs="0"/>
+<xs:element name="apikey" type="xs:string" minOccurs="0"/>
+<xs:element name="applicationID" type="xs:string" minOccurs="0"/>
+<xs:element name="authenticationID" type="xs:string" minOccurs="0"/>
+<xs:element name="category" type="xs:string" minOccurs="0"/>
+<xs:element name="customer" type="xs:string" minOccurs="0"/>
+<xs:element name="drawdownAccount" type="xs:string" minOccurs="0"/>
+<xs:element name="hash" type="xs:string" minOccurs="0"/>
+<xs:element name="interfaceName" type="xs:string" minOccurs="0"/>
+<xs:element name="introducer" type="xs:string" minOccurs="0"/>
+<xs:element name="loanApplicationID" type="xs:string" minOccurs="0"/>
+<xs:element name="loanApprovedDate" type="xs:string" minOccurs="0"/>
+<xs:element name="loanDisbursedAmount" type="xs:string" minOccurs="0"/>
+<xs:element name="loanPurpose" type="xs:string" minOccurs="0"/>
+<xs:element name="loanType" type="xs:string" minOccurs="0"/>
+<xs:element name="maturityDate" type="xs:string" minOccurs="0"/>
+<xs:element name="meansOfPayment" type="xs:string" minOccurs="0"/>
+<xs:element name="principalAmount" type="xs:string" minOccurs="0"/>
+<xs:element name="provisionMethod" type="xs:string" minOccurs="0"/>
+<xs:element name="repaymentStartDate" type="xs:string" minOccurs="0"/>
+<xs:element name="repaymentType" type="xs:string" minOccurs="0"/>
+<xs:element name="valueDate" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="PublicFederalLoanResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:objectResponse" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="LoanAccount">
+<xs:sequence>
+<xs:element name="accountdetails" type="tns:loanAccountRequest" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="loanAccountRequest">
+<xs:sequence>
+<xs:element name="accountMnemonic" type="xs:string" minOccurs="0"/>
+<xs:element name="accountName" type="xs:string" minOccurs="0"/>
+<xs:element name="apikey" type="xs:string" minOccurs="0"/>
+<xs:element name="applicationID" type="xs:string" minOccurs="0"/>
+<xs:element name="authenticationID" type="xs:string" minOccurs="0"/>
+<xs:element name="blockedReasons" type="xs:string" minOccurs="0"/>
+<xs:element name="branchLocation" type="xs:string" minOccurs="0"/>
+<xs:element name="businessSegmentCode" type="xs:string" minOccurs="0"/>
+<xs:element name="category" type="xs:string" minOccurs="0"/>
+<xs:element name="currency" type="xs:string" minOccurs="0"/>
+<xs:element name="customerNo" type="xs:string" minOccurs="0"/>
+<xs:element name="gender" type="xs:string" minOccurs="0"/>
+<xs:element name="hash" type="xs:string" minOccurs="0"/>
+<xs:element name="IPPISnumber" type="xs:string" minOccurs="0"/>
+<xs:element name="limitReference" type="xs:string" minOccurs="0"/>
+<xs:element name="openingDate" type="xs:string" minOccurs="0"/>
+<xs:element name="transRef" type="xs:string" minOccurs="0"/>
+<xs:element name="valueDate" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="LoanAccountResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:objectResponse" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="FormalLoan">
+<xs:sequence>
+<xs:element name="icldeposit" type="tns:iclCashLoanRequest" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="iclCashLoanRequest">
+<xs:sequence>
+<xs:element name="accountOfficer" type="xs:string" minOccurs="0"/>
+<xs:element name="apikey" type="xs:string" minOccurs="0"/>
+<xs:element name="applicationID" type="xs:string" minOccurs="0"/>
+<xs:element name="authenticationID" type="xs:string" minOccurs="0"/>
+<xs:element name="autoSchedule" type="xs:string" minOccurs="0"/>
+<xs:element name="category" type="xs:string" minOccurs="0"/>
+<xs:element name="comment" type="xs:string" minOccurs="0"/>
+<xs:element name="currency" type="xs:string" minOccurs="0"/>
+<xs:element name="customer" type="xs:string" minOccurs="0"/>
+<xs:element name="defineSchedule" type="xs:string" minOccurs="0"/>
+<xs:element name="drawdownAccount" type="xs:string" minOccurs="0"/>
+<xs:element name="hash" type="xs:string" minOccurs="0"/>
+<xs:element name="interestRate" type="xs:double"/>
+<xs:element name="interfaceName" type="xs:string" minOccurs="0"/>
+<xs:element name="liquidationMode" type="xs:string" minOccurs="0"/>
+<xs:element name="loanAmount" type="xs:int"/>
+<xs:element name="loanApplicationID" type="xs:string" minOccurs="0"/>
+<xs:element name="loanApprovedDate" type="xs:string" minOccurs="0"/>
+<xs:element name="loanDisbursedAmount" type="xs:string" minOccurs="0"/>
+<xs:element name="loanPurpose" type="xs:string" minOccurs="0"/>
+<xs:element name="loanType" type="xs:string" minOccurs="0"/>
+<xs:element name="maturityDate" type="xs:string" minOccurs="0"/>
+<xs:element name="provisionMethod" type="xs:string" minOccurs="0"/>
+<xs:element name="repaymentFrequency" type="xs:string" minOccurs="0"/>
+<xs:element name="repaymentStartDate" type="xs:string" minOccurs="0"/>
+<xs:element name="repaymentType" type="xs:string" minOccurs="0"/>
+<xs:element name="valueDate" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="FormalLoanResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:objectResponse" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="IndividualCustomer">
+<xs:sequence>
+<xs:element name="indetails" type="tns:individualCustomerRequest" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="individualCustomerRequest">
+<xs:sequence>
+<xs:element name="accountOfficer" type="xs:string" minOccurs="0"/>
+<xs:element name="apikey" type="xs:string" minOccurs="0"/>
+<xs:element name="applicationID" type="xs:string" minOccurs="0"/>
+<xs:element name="authenticationID" type="xs:string" minOccurs="0"/>
+<xs:element name="branchMISCode" type="xs:string" minOccurs="0"/>
+<xs:element name="CLUBREFNO" type="xs:string" minOccurs="0"/>
+<xs:element name="customerBVNNo" type="xs:string" minOccurs="0"/>
+<xs:element name="customerOpeningDate" type="xs:string" minOccurs="0"/>
+<xs:element name="dateofBirth" type="xs:string" minOccurs="0"/>
+<xs:element name="firstName" type="xs:string" minOccurs="0"/>
+<xs:element name="gender" type="xs:string" minOccurs="0"/>
+<xs:element name="hash" type="xs:string" minOccurs="0"/>
+<xs:element name="homeaddress" type="xs:string" minOccurs="0"/>
+<xs:element name="industry" type="xs:string" minOccurs="0"/>
+<xs:element name="initials" type="xs:string" minOccurs="0"/>
+<xs:element name="interfaceName" type="xs:string" minOccurs="0"/>
+<xs:element name="introducer" type="xs:string" minOccurs="0"/>
+<xs:element name="maidenName" type="xs:string" minOccurs="0"/>
+<xs:element name="maritalStatus" type="xs:string" minOccurs="0"/>
+<xs:element name="meansOfPayment" type="xs:string" minOccurs="0"/>
+<xs:element name="middleName" type="xs:string" minOccurs="0"/>
+<xs:element name="mnemonic" type="xs:string" minOccurs="0"/>
+<xs:element name="primeraRefer" type="xs:string" minOccurs="0"/>
+<xs:element name="refereeName" type="xs:string" minOccurs="0"/>
+<xs:element name="refereePhoneNo" type="xs:string" minOccurs="0"/>
+<xs:element name="repaymentType" type="xs:string" minOccurs="0"/>
+<xs:element name="sector" type="xs:string" minOccurs="0"/>
+<xs:element name="surname" type="xs:string" minOccurs="0"/>
+<xs:element name="title" type="xs:string" minOccurs="0"/>
+<xs:element name="typeOfLoan" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="IndividualCustomerResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:objectResponse" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="MicroCreditCustomer">
+<xs:sequence>
+<xs:element name="mcdetails" type="tns:microCreditRequest" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="microCreditRequest">
+<xs:sequence>
+<xs:element name="accountOfficer" type="xs:string" minOccurs="0"/>
+<xs:element name="apikey" type="xs:string" minOccurs="0"/>
+<xs:element name="applicationID" type="xs:string" minOccurs="0"/>
+<xs:element name="authenticationID" type="xs:string" minOccurs="0"/>
+<xs:element name="BVNNumber" type="xs:string" minOccurs="0"/>
+<xs:element name="branchMISCode" type="xs:string" minOccurs="0"/>
+<xs:element name="businesStartDate" type="xs:string" minOccurs="0"/>
+<xs:element name="customerLanguage" type="xs:string" minOccurs="0"/>
+<xs:element name="customerOpeningDate" type="xs:string" minOccurs="0"/>
+<xs:element name="dateofBirth" type="xs:string" minOccurs="0"/>
+<xs:element name="entityType" type="xs:string" minOccurs="0"/>
+<xs:element name="firstName" type="xs:string" minOccurs="0"/>
+<xs:element name="guarantorName" type="xs:string" minOccurs="0"/>
+<xs:element name="hash" type="xs:string" minOccurs="0"/>
+<xs:element name="industry" type="xs:string" minOccurs="0"/>
+<xs:element name="initials" type="xs:string" minOccurs="0"/>
+<xs:element name="interfaceName" type="xs:string" minOccurs="0"/>
+<xs:element name="introducer" type="xs:string" minOccurs="0"/>
+<xs:element name="loanType" type="xs:string" minOccurs="0"/>
+<xs:element name="middleName" type="xs:string" minOccurs="0"/>
+<xs:element name="mnemonic" type="xs:string" minOccurs="0"/>
+<xs:element name="nationality" type="xs:string" minOccurs="0"/>
+<xs:element name="POBOXNo" type="xs:string" minOccurs="0"/>
+<xs:element name="primeraRefer" type="xs:string" minOccurs="0"/>
+<xs:element name="refereeName" type="xs:string" minOccurs="0"/>
+<xs:element name="refereePhoneNo" type="xs:string" minOccurs="0"/>
+<xs:element name="repaymentType" type="xs:string" minOccurs="0"/>
+<xs:element name="residence" type="xs:string" minOccurs="0"/>
+<xs:element name="sector" type="xs:string" minOccurs="0"/>
+<xs:element name="street" type="xs:string" minOccurs="0"/>
+<xs:element name="surname" type="xs:string" minOccurs="0"/>
+<xs:element name="title" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="MicroCreditCustomerResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:objectResponse" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="PayrollLoan">
+<xs:sequence>
+<xs:element name="loansdeposits" type="tns:abjLoansRequest" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="abjLoansRequest">
+<xs:sequence>
+<xs:element name="accountOfficer" type="xs:string" minOccurs="0"/>
+<xs:element name="apikey" type="xs:string" minOccurs="0"/>
+<xs:element name="applicationID" type="xs:string" minOccurs="0"/>
+<xs:element name="authenticationID" type="xs:string" minOccurs="0"/>
+<xs:element name="customer" type="xs:string" minOccurs="0"/>
+<xs:element name="hash" type="xs:string" minOccurs="0"/>
+<xs:element name="interfaceName" type="xs:string" minOccurs="0"/>
+<xs:element name="introducer" type="xs:string" minOccurs="0"/>
+<xs:element name="loanApplicationID" type="xs:string" minOccurs="0"/>
+<xs:element name="loanApprovedDate" type="xs:string" minOccurs="0"/>
+<xs:element name="loanDisbursedAmount" type="xs:string" minOccurs="0"/>
+<xs:element name="loanPurpose" type="xs:string" minOccurs="0"/>
+<xs:element name="loanType" type="xs:string" minOccurs="0"/>
+<xs:element name="maturityDate" type="xs:string" minOccurs="0"/>
+<xs:element name="provisionMethod" type="xs:string" minOccurs="0"/>
+<xs:element name="repaymentType" type="xs:string" minOccurs="0"/>
+<xs:element name="valueDate" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="PayrollLoanResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:objectResponse" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="NonIndividualCustomer">
+<xs:sequence>
+<xs:element name="nindetails" type="tns:nonIndividualCustomerRequest" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="nonIndividualCustomerRequest">
+<xs:sequence>
+<xs:element name="abbreviatedName" type="xs:string" minOccurs="0"/>
+<xs:element name="accountOfficer" type="xs:string" minOccurs="0"/>
+<xs:element name="apikey" type="xs:string" minOccurs="0"/>
+<xs:element name="applicationID" type="xs:string" minOccurs="0"/>
+<xs:element name="authenticationID" type="xs:string" minOccurs="0"/>
+<xs:element name="BVNNumber" type="xs:string" minOccurs="0"/>
+<xs:element name="businessstartdate" type="xs:string" minOccurs="0"/>
+<xs:element name="creditIndicator" type="xs:string" minOccurs="0"/>
+<xs:element name="customerOpeningDate" type="xs:string" minOccurs="0"/>
+<xs:element name="customerStatus" type="xs:string" minOccurs="0"/>
+<xs:element name="dateRegistered" type="xs:string" minOccurs="0"/>
+<xs:element name="dateofSignature" type="xs:string" minOccurs="0"/>
+<xs:element name="hash" type="xs:string" minOccurs="0"/>
+<xs:element name="homeaddress" type="xs:string" minOccurs="0"/>
+<xs:element name="industry" type="xs:string" minOccurs="0"/>
+<xs:element name="interfaceName" type="xs:string" minOccurs="0"/>
+<xs:element name="loanType" type="xs:string" minOccurs="0"/>
+<xs:element name="loansWrittenOff" type="xs:string" minOccurs="0"/>
+<xs:element name="mnemonic" type="xs:string" minOccurs="0"/>
+<xs:element name="nameofEntity" type="xs:string" minOccurs="0"/>
+<xs:element name="POBoxNumber" type="xs:string" minOccurs="0"/>
+<xs:element name="primeraRefer" type="xs:string" minOccurs="0"/>
+<xs:element name="refereeName" type="xs:string" minOccurs="0"/>
+<xs:element name="refereePhoneNo" type="xs:string" minOccurs="0"/>
+<xs:element name="registrationNo" type="xs:string" minOccurs="0"/>
+<xs:element name="sector" type="xs:string" minOccurs="0"/>
+<xs:element name="state" type="xs:string" minOccurs="0"/>
+<xs:element name="town" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="NonIndividualCustomerResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:objectResponse" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="ChequeManagement">
+<xs:sequence>
+<xs:element name="chequecollect" type="tns:chequeCollectionRequest" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="chequeCollectionRequest">
+<xs:sequence>
+<xs:element name="accountOfficer" type="xs:string" minOccurs="0"/>
+<xs:element name="apikey" type="xs:string" minOccurs="0"/>
+<xs:element name="applicationID" type="xs:string" minOccurs="0"/>
+<xs:element name="authenticationID" type="xs:string" minOccurs="0"/>
+<xs:element name="chequeAcctNo" type="xs:string" minOccurs="0"/>
+<xs:element name="chequeSerialNumber" type="xs:string" minOccurs="0"/>
+<xs:element name="chequeSignedBy" type="xs:string" minOccurs="0"/>
+<xs:element name="comment" type="xs:string" minOccurs="0"/>
+<xs:element name="customerBankBranch" type="xs:string" minOccurs="0"/>
+<xs:element name="customerCIF" type="xs:string" minOccurs="0"/>
+<xs:element name="customerLoanNo" type="xs:string" minOccurs="0"/>
+<xs:element name="customerName" type="xs:string" minOccurs="0"/>
+<xs:element name="dateChequePresented" type="xs:string" minOccurs="0"/>
+<xs:element name="dateCollected" type="xs:string" minOccurs="0"/>
+<xs:element name="hash" type="xs:string" minOccurs="0"/>
+<xs:element name="interfaceName" type="xs:string" minOccurs="0"/>
+<xs:element name="t24AcctNo" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="ChequeManagementResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:objectResponse" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="PublicStateLoan">
+<xs:sequence>
+<xs:element name="statedeposit" type="tns:iclPublicStateRequest" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="iclPublicStateRequest">
+<xs:sequence>
+<xs:element name="accountOfficer" type="xs:string" minOccurs="0"/>
+<xs:element name="amountApproved" type="xs:string" minOccurs="0"/>
+<xs:element name="apikey" type="xs:string" minOccurs="0"/>
+<xs:element name="applicationID" type="xs:string" minOccurs="0"/>
+<xs:element name="authenticationID" type="xs:string" minOccurs="0"/>
+<xs:element name="customer" type="xs:string" minOccurs="0"/>
+<xs:element name="hash" type="xs:string" minOccurs="0"/>
+<xs:element name="interfaceName" type="xs:string" minOccurs="0"/>
+<xs:element name="introducer" type="xs:string" minOccurs="0"/>
+<xs:element name="loanApplicationID" type="xs:string" minOccurs="0"/>
+<xs:element name="loanApprovedDate" type="xs:string" minOccurs="0"/>
+<xs:element name="loanDisbursedAmount" type="xs:string" minOccurs="0"/>
+<xs:element name="loanPurpose" type="xs:string" minOccurs="0"/>
+<xs:element name="loanType" type="xs:string" minOccurs="0"/>
+<xs:element name="maturityDate" type="xs:string" minOccurs="0"/>
+<xs:element name="meansOfPayment" type="xs:string" minOccurs="0"/>
+<xs:element name="principalAmount" type="xs:string" minOccurs="0"/>
+<xs:element name="provisionMethod" type="xs:string" minOccurs="0"/>
+<xs:element name="repaymentStartDate" type="xs:string" minOccurs="0"/>
+<xs:element name="repaymentType" type="xs:string" minOccurs="0"/>
+<xs:element name="valueDate" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="PublicStateLoanResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:objectResponse" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+</xs:schema>

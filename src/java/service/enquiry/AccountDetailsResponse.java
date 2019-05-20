@@ -34,6 +34,7 @@ public class AccountDetailsResponse {
     private String ResponseCode;
     private String ResponseText;
     private String Message;
+    private String TransactionDate;
 
     @Override
     public String toString() {

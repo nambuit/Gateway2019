@@ -35,45 +35,9 @@
             <classpath path="${java.home}/../lib/tools.jar:${build.classes.dir}:${j2ee.platform.wsgen.classpath}:${javac.classpath}"/>
         </wsgen>
     </target>
-    <target name="wsgen-T24Interface" depends="wsgen-init">
-        <copy todir="${build.classes.dir}/META-INF">
-            <fileset dir="${webinf.dir}" includes="wsit-main.service.latest.T24Interface.xml"/>
-        </copy>
-        <wsgen sourcedestdir="${build.generated.sources.dir}/jax-ws" resourcedestdir="${build.generated.sources.dir}/jax-ws/resources/" destdir="${build.generated.sources.dir}/jax-ws" verbose="true" keep="true" genwsdl="true" sei="main.service.latest.T24Interface" xendorsed="true">
-            <classpath path="${java.home}/../lib/tools.jar:${build.classes.dir}:${j2ee.platform.wsgen.classpath}:${javac.classpath}"/>
-        </wsgen>
-    </target>
     <!--
                 ===================
                 JAX-WS WSIMPORT SECTION
                 ===================
             -->
-    <target name="wsimport-init" depends="init">
-        <fail if="${wsimport.bad.version}" message="WsImport ant task defined in the classpath ${j2ee.platform.wsimport.classpath} has a serious bug. See http://wiki.netbeans.org/MetroIssue for details."/>
-        <mkdir dir="${build.generated.sources.dir}/jax-ws"/>
-        <property name="j2ee.platform.wsimport.classpath" value="${libs.jaxws21.classpath}"/>
-        <taskdef name="wsimport" classname="com.sun.tools.ws.ant.WsImport">
-            <classpath path="${java.home}/../lib/tools.jar:${j2ee.platform.wsimport.classpath}:${javac.classpath}"/>
-        </taskdef>
-        <condition property="conf-dir" value="${conf.dir}/" else="">
-            <isset property="conf.dir"/>
-        </condition>
-    </target>
-    <target name="wsimport-client-T24Interface" depends="wsimport-init">
-        <mkdir dir="${build.generated.dir}/jax-wsCache/T24Interface"/>
-        <wsimport sourcedestdir="${build.generated.dir}/jax-wsCache/T24Interface" destdir="${build.generated.dir}/jax-wsCache/T24Interface" wsdl="${basedir}/${conf-dir}xml-resources/web-service-references/T24Interface/wsdl/applicationsvr_8080/PrimeraGateway/T24Interface.wsdl" catalog="catalog.xml" encoding="${source.encoding}" extension="true" verbose="true" fork="false" wsdlLocation="http://applicationsvr:8080/PrimeraGateway/T24Interface?wsdl" xnocompile="true" xendorsed="true">
-            <depends file="${basedir}/${conf-dir}xml-resources/web-service-references/T24Interface/wsdl/applicationsvr_8080/PrimeraGateway/T24Interface.wsdl"/>
-            <produces dir="${build.generated.dir}/jax-wsCache/T24Interface"/>
-        </wsimport>
-        <copy todir="${build.generated.sources.dir}/jax-ws">
-            <fileset dir="${build.generated.dir}/jax-wsCache/T24Interface">
-                <include name="**/*.java"/>
-            </fileset>
-        </copy>
-    </target>
-    <target name="wsimport-client-clean-T24Interface" depends="-init-project">
-        <delete dir="${build.generated.sources.dir}/jax-ws/main/service"/>
-        <delete dir="${build.generated.dir}/jax-wsCache/T24Interface"/>
-    </target>
-    <target name="wsimport-client-generate" depends="wsimport-client-T24Interface"/>
 </project>

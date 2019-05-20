@@ -40,5 +40,8 @@ public class IclCashLoanRequest {
     private String AccountOfficer;
     private String hash;
     private String InterfaceName;
+    private String apikey;
+    private String authenticationID;
+    private String applicationID;
     
 }

@@ -5,7 +5,6 @@
  */
 package primera.service;
 
-import main.service.*;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,18 +13,19 @@ import lombok.Setter;
  *
  * @author Temitope
  */
-@Getter @Setter 
+@Getter
+@Setter
 public class ofsParam {
-        
+
     private String operation;
-    
+
     private String version;
-    
+
     private String[] Options;
 
     private String transaction_id;
-        
-   private String[] credentials;
 
-   private List<DataItem> DataItems; 
+    private String[] credentials;
+
+    private List<DataItem> DataItems;
 }

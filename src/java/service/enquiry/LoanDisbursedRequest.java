@@ -12,11 +12,15 @@ import lombok.Setter;
  *
  * @author emusa
  */
-@Getter @Setter
-public class LoanDisbursedRequest
-{
-    
+@Getter
+@Setter
+public class LoanDisbursedRequest {
+
     private String CustomerNumber;
     private String hash;
-     
+    private String startdate;
+    private String enddate;
+    private String apikey;
+    private String applicationID;
+    private String authenticationID;
 }

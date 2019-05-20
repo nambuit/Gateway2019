@@ -15,6 +15,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class IclChequeResponse {
+
     private String T24ChequeID;
     private String CustomerLoanID;
     private String T24AcctNo;
@@ -30,6 +31,7 @@ public class IclChequeResponse {
     private String ResponseCode;
     private String ResponseText;
     private String Message;
+    private String TransactionDate;
 
     @Override
     public String toString() {

@@ -21,6 +21,10 @@ public class LdBalancesSumRequest {
    private String Charges;
    private String Interest;
    private String Outstanding;
+   private String apikey;
+   private String applicationID;
+   private String authenticationID;
+   private String hash;
    
     
 }

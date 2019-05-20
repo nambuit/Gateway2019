@@ -28,6 +28,7 @@ public class CategEntBookResponse {
     private String ResponseCode;
     private String ResponseText;
     private String Message;
+    private String TransactionDate;
 
     @Override
     public String toString() {
@@ -37,6 +38,7 @@ public class CategEntBookResponse {
         builder.append("ResponseCode:" + ResponseCode + " ");
         builder.append("ResponseText:" + ResponseText + " ");
         builder.append("Message:" + Message + " ");
+        builder.append("TransactionDate:" + TransactionDate + " ");
         return builder.toString();
 
     }

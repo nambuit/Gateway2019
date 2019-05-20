@@ -22,4 +22,7 @@ public class DailyExpectedRequest {
     private String PrinAmount;
     private String InterestRepay;
     private String TotalRepayment;
+    private String apikey;
+    private String authenticationID;
+    private String applicationID;
 }
